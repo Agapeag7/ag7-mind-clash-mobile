@@ -19,9 +19,10 @@ class RopeComponent extends PositionComponent {
   }) : super(priority: 50);
 
   void setPosition(double pos) {
-    ropePosition = pos.clamp(-5.0, 5.0);
-    _oscSpeed = 8.0 * (pos - ropePosition).sign;
-    _oscSpeed = 8.0;
+    final targetPosition = pos.clamp(-5.0, 5.0);
+    final delta = targetPosition - ropePosition;
+    ropePosition = targetPosition;
+    _oscSpeed = 8.0 * delta.sign;
   }
 
   @override
@@ -55,7 +56,7 @@ class RopeComponent extends PositionComponent {
       Offset(ropeStartX + 8, ropeY - 1.5),
       Offset(ropeEndX - 8, ropeY - 1.5),
       Paint()
-        ..color = Colors.white.withOpacity(0.35)
+        ..color = Colors.white.withValues(alpha: 0.35)
         ..strokeWidth = 1.5,
     );
 

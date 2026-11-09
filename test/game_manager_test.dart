@@ -1,8 +1,13 @@
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ag7_mind_clash/core/difficulty.dart';
 import 'package:ag7_mind_clash/game/game_manager.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+      .setMockMethodCallHandler(SystemChannels.platform, (_) async => null);
+
   test('Une nouvelle partie démarre avec corde à 0', () {
     final gm = GameManager(
       config: DifficultyConfig.byLevel(1),
@@ -12,6 +17,7 @@ void main() {
     expect(gm.ropePosition, 0);
     expect(gm.red.roundsWon, 0);
     expect(gm.blue.roundsWon, 0);
+    gm.dispose();
   });
 
   test('Bonne réponse déplace la corde vers le rouge', () {
