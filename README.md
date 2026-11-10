@@ -23,3 +23,9 @@ APK : `build/app/outputs/flutter-apk/app-release.apk`
 - `lib/providers/` — providers Riverpod (settings, stats)
 - `lib/screens/` — les 10 écrans de l'application
 - `test/` — tests unitaires
+
+## Compilation Android sur une machine à mémoire limitée
+
+La mémoire du daemon Gradle est plafonnée à 1,5 Go et ses workers sont limités à deux pour éviter que la compilation ne dépasse la mémoire disponible. Pour générer l'APK :
+
+    flutter build apk --release

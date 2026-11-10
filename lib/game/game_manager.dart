@@ -1,5 +1,7 @@
 import 'dart:async';
+
 import 'package:flutter/foundation.dart';
+
 import '../core/constants.dart';
 import '../core/difficulty.dart';
 import '../core/enums.dart';
@@ -63,7 +65,7 @@ class GameManager extends ChangeNotifier {
   bool _blueRopeFrozen = false;
 
   Timer? _tick;
-  Timer? _aiTimer;
+  int _aiRequestGeneration = 0;
 
   bool get isRedTurn => activeTeam.isRed;
 
@@ -207,8 +209,9 @@ class GameManager extends ChangeNotifier {
     // Drop de bonus (30%)
     if (DateTime.now().microsecondsSinceEpoch % 100 <
         GameConstants.bonusDropChancePercent) {
-      final p = PowerUp.catalog[
-          (DateTime.now().microsecondsSinceEpoch ~/ 100) % PowerUp.catalog.length];
+      final p =
+          PowerUp.catalog[(DateTime.now().microsecondsSinceEpoch ~/ 100) %
+              PowerUp.catalog.length];
       (team.isRed ? redInventory : blueInventory).add(p);
     }
 
@@ -253,11 +256,15 @@ class GameManager extends ChangeNotifier {
     } else {
       // Perdu le tour, la corde va vers l'adversaire
       if (team.isRed) {
-        _rope = (_rope + 1.0).clamp(-GameConstants.maxRopePosition,
-            GameConstants.maxRopePosition);
+        _rope = (_rope + 1.0).clamp(
+          -GameConstants.maxRopePosition,
+          GameConstants.maxRopePosition,
+        );
       } else {
-        _rope = (_rope - 1.0).clamp(-GameConstants.maxRopePosition,
-            GameConstants.maxRopePosition);
+        _rope = (_rope - 1.0).clamp(
+          -GameConstants.maxRopePosition,
+          GameConstants.maxRopePosition,
+        );
       }
       if (_rope.abs() >= GameConstants.maxRopePosition) {
         _endRound(_rope < 0 ? red : blue);
@@ -281,20 +288,24 @@ class GameManager extends ChangeNotifier {
   void _scheduleAIResponse() {
     _cancelAI();
     if (!isVsAI || _question == null) return;
-    _aiTimer = Timer(Duration(milliseconds:
-        ((config.aiMinDelay + config.aiMaxDelay) * 500).round()), () async {
-      if (_phase != GamePhase.activeTurn || activeTeam.isRed) return;
-      final q = _question;
-      if (q == null) return;
-      final answer = await _ai.think(q);
-      if (_phase != GamePhase.activeTurn || activeTeam.isRed) return;
-      submitAnswer(answer);
-    });
+    final question = _question!;
+    final requestGeneration = _aiRequestGeneration;
+    unawaited(_respondAsAI(question, requestGeneration));
+  }
+
+  Future<void> _respondAsAI(Question question, int requestGeneration) async {
+    final answer = await _ai.think(question);
+    if (requestGeneration != _aiRequestGeneration ||
+        _phase != GamePhase.activeTurn ||
+        activeTeam.isRed ||
+        !identical(_question, question)) {
+      return;
+    }
+    submitAnswer(answer);
   }
 
   void _cancelAI() {
-    _aiTimer?.cancel();
-    _aiTimer = null;
+    _aiRequestGeneration++;
   }
 
   // -------------------------------------------------------------

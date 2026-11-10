@@ -1,5 +1,6 @@
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
+
 import '../core/constants.dart';
 import '../core/difficulty.dart';
 import '../core/enums.dart';
@@ -15,11 +16,7 @@ class GameScreen extends StatefulWidget {
   final GameMode mode;
   final int difficulty;
 
-  const GameScreen({
-    super.key,
-    required this.mode,
-    required this.difficulty,
-  });
+  const GameScreen({super.key, required this.mode, required this.difficulty});
 
   @override
   State<GameScreen> createState() => _GameScreenState();
@@ -139,8 +136,7 @@ class _GameScreenState extends State<GameScreen> {
   void _onBackspace() {
     final t = _answerController.text;
     if (t.isEmpty) return;
-    setState(() =>
-        _answerController.text = t.substring(0, t.length - 1));
+    setState(() => _answerController.text = t.substring(0, t.length - 1));
     AudioService.tap();
   }
 
@@ -220,8 +216,7 @@ class _GameScreenState extends State<GameScreen> {
   @override
   Widget build(BuildContext context) {
     final activeTeam = _gm.activeTeam;
-    final activeColor =
-        activeTeam.isRed ? AppColors.red : AppColors.blue;
+    final activeColor = activeTeam.isRed ? AppColors.red : AppColors.blue;
 
     return Scaffold(
       body: SafeArea(
@@ -233,11 +228,27 @@ class _GameScreenState extends State<GameScreen> {
                 children: [
                   GameWidget(game: _game),
                   Positioned(
+                    top: 12,
+                    left: 12,
+                    child: _teamMarker('ÉQUIPE ROUGE', AppColors.red),
+                  ),
+                  Positioned(
+                    top: 12,
+                    right: 56,
+                    child: _teamMarker(
+                      _gm.isVsAI ? 'ÉQUIPE BLEUE · IA' : 'ÉQUIPE BLEUE',
+                      AppColors.blue,
+                    ),
+                  ),
+                  Positioned(
                     top: 8,
                     right: 8,
                     child: IconButton(
-                      icon: const Icon(Icons.pause_circle_filled,
-                          size: 40, color: Colors.white),
+                      icon: const Icon(
+                        Icons.pause_circle_filled,
+                        size: 40,
+                        color: AppColors.navy,
+                      ),
                       onPressed: _onPause,
                     ),
                   ),
@@ -253,8 +264,11 @@ class _GameScreenState extends State<GameScreen> {
 
   Widget _buildHeader(Color activeColor) {
     return Container(
-      color: activeColor,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        border: Border(bottom: BorderSide(color: AppColors.panelBorder)),
+      ),
       child: Row(
         children: [
           _scoreChip('Rouge', _gm.red.roundsWon, AppColors.red),
@@ -264,11 +278,21 @@ class _GameScreenState extends State<GameScreen> {
               Text(
                 'Manche ${_gm.currentRound}',
                 style: const TextStyle(
-                    color: Colors.white, fontWeight: FontWeight.w700),
+                  color: AppColors.navy,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
               Text(
-                _gm.isRedTurn ? 'Tour ROUGE' : 'Tour BLEU',
-                style: const TextStyle(color: Colors.white70, fontSize: 12),
+                _gm.isRedTurn
+                    ? 'Tour ROUGE'
+                    : _gm.isVsAI
+                    ? 'Tour de l’IA'
+                    : 'Tour BLEU',
+                style: TextStyle(
+                  color: activeColor,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ],
           ),
@@ -290,7 +314,35 @@ class _GameScreenState extends State<GameScreen> {
       child: Text(
         '$name $score',
         style: const TextStyle(
-            color: Colors.white, fontWeight: FontWeight.w700),
+          color: Colors.white,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+
+  Widget _teamMarker(String label, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.92),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: color, width: 1.5),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x1A102348),
+            blurRadius: 5,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: color,
+          fontSize: 11,
+          fontWeight: FontWeight.w900,
+        ),
       ),
     );
   }
@@ -298,8 +350,18 @@ class _GameScreenState extends State<GameScreen> {
   Widget _buildQuestionPanel(Color activeColor) {
     final q = _gm.question;
     return Container(
-      padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
-      color: Colors.black.withValues(alpha: 0.04),
+      padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        border: Border(top: BorderSide(color: AppColors.panelBorder)),
+        boxShadow: [
+          BoxShadow(
+            color: Color(0x140D2444),
+            blurRadius: 10,
+            offset: Offset(0, -3),
+          ),
+        ],
+      ),
       child: Column(
         children: [
           Row(
@@ -317,7 +379,10 @@ class _GameScreenState extends State<GameScreen> {
               const SizedBox(width: 8),
               Text(
                 '${_gm.timeLeft.toStringAsFixed(1)}s',
-                style: const TextStyle(fontWeight: FontWeight.w700),
+                style: const TextStyle(
+                  color: AppColors.navy,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
               const SizedBox(width: 8),
               Text('♥ ${_gm.attemptsLeft}'),
@@ -327,22 +392,24 @@ class _GameScreenState extends State<GameScreen> {
           Text(
             q?.expression ?? '—',
             style: const TextStyle(
-                fontSize: 32, fontWeight: FontWeight.w900),
+              color: AppColors.navy,
+              fontSize: 32,
+              fontWeight: FontWeight.w900,
+            ),
           ),
           const SizedBox(height: 8),
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.bgTop,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: activeColor, width: 2),
             ),
             child: Text(
               _answerController.text.isEmpty ? '…' : _answerController.text,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                  fontSize: 24, fontWeight: FontWeight.w700),
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
             ),
           ),
           const SizedBox(height: 8),
@@ -400,11 +467,12 @@ class _GameScreenState extends State<GameScreen> {
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: isAction
-                          ? Colors.grey.shade300
+                          ? AppColors.bgBottom
                           : Colors.white,
-                      foregroundColor: Colors.black87,
+                      foregroundColor: AppColors.navy,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(12),
+                        side: const BorderSide(color: AppColors.panelBorder),
                       ),
                       elevation: 1,
                     ),
@@ -422,7 +490,9 @@ class _GameScreenState extends State<GameScreen> {
                     child: Text(
                       label,
                       style: const TextStyle(
-                          fontSize: 18, fontWeight: FontWeight.w700),
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
                 ),

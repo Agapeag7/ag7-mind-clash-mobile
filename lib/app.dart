@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+
 import 'core/constants.dart';
 import 'screens/splash_screen.dart';
 
@@ -10,7 +11,10 @@ class Ag7App extends StatelessWidget {
   Widget build(BuildContext context) {
     final base = ThemeData(
       useMaterial3: true,
-      colorScheme: ColorScheme.fromSeed(seedColor: AppColors.red),
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: AppColors.blue,
+        surface: AppColors.bgTop,
+      ),
       scaffoldBackgroundColor: AppColors.bgBottom,
     );
     return MaterialApp(
@@ -18,6 +22,17 @@ class Ag7App extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: base.copyWith(
         textTheme: GoogleFonts.fredokaTextTheme(base.textTheme),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: AppColors.bgTop,
+          foregroundColor: AppColors.navy,
+          centerTitle: true,
+          elevation: 0,
+          titleTextStyle: TextStyle(
+            color: AppColors.navy,
+            fontSize: 20,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
       ),
       home: const SplashScreen(),
     );

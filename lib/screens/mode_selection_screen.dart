@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../core/constants.dart';
 import '../core/enums.dart';
+import '../widgets/game_ui.dart';
 import 'difficulty_selection_screen.dart';
 
 class ModeSelectionScreen extends StatelessWidget {
@@ -9,26 +10,41 @@ class ModeSelectionScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Choisir un mode')),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _ModeCard(
-              title: 'JOUEUR vs JOUEUR',
-              subtitle: 'Deux joueurs sur le même appareil',
-              color: AppColors.red,
-              onTap: () => _goToDifficulty(context, GameMode.playerVsPlayer),
+      appBar: AppBar(title: const Text('Choisis ton mode')),
+      body: GamePageBackground(
+        child: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 480),
+                child: Column(
+                  children: [
+                    const GamePageHeading(
+                      title: 'À toi de jouer !',
+                      subtitle: 'Choisis ton adversaire',
+                    ),
+                    const SizedBox(height: 22),
+                    _ModeCard(
+                      title: 'JOUEUR VS JOUEUR',
+                      subtitle: 'Défie un ami sur le même appareil',
+                      includeRobot: false,
+                      onTap: () =>
+                          _goToDifficulty(context, GameMode.playerVsPlayer),
+                    ),
+                    const SizedBox(height: 16),
+                    _ModeCard(
+                      title: 'JOUEUR VS IA',
+                      subtitle: 'Affronte notre robot calculateur',
+                      includeRobot: true,
+                      onTap: () =>
+                          _goToDifficulty(context, GameMode.playerVsAI),
+                    ),
+                  ],
+                ),
+              ),
             ),
-            const SizedBox(height: 20),
-            _ModeCard(
-              title: 'JOUEUR vs IA',
-              subtitle: 'Affrontez une intelligence artificielle',
-              color: AppColors.blue,
-              onTap: () => _goToDifficulty(context, GameMode.playerVsAI),
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -47,51 +63,45 @@ class ModeSelectionScreen extends StatelessWidget {
 class _ModeCard extends StatelessWidget {
   final String title;
   final String subtitle;
-  final Color color;
+  final bool includeRobot;
   final VoidCallback onTap;
 
   const _ModeCard({
     required this.title,
     required this.subtitle,
-    required this.color,
+    required this.includeRobot,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
-      child: Container(
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: color.withValues(alpha: 0.4),
-              blurRadius: 12,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.w800,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        child: GamePanel(
+          padding: const EdgeInsets.fromLTRB(14, 14, 14, 16),
+          child: Column(
+            children: [
+              GameCharacterPair(height: 128, includeRobot: includeRobot),
+              const SizedBox(height: 8),
+              Text(
+                title,
+                style: const TextStyle(
+                  color: AppColors.navy,
+                  fontSize: 17,
+                  fontWeight: FontWeight.w900,
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              subtitle,
-              style: const TextStyle(color: Colors.white70, fontSize: 14),
-            ),
-          ],
+              const SizedBox(height: 3),
+              Text(
+                subtitle,
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: AppColors.muted),
+              ),
+            ],
+          ),
         ),
       ),
     );

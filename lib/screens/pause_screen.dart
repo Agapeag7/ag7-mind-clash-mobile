@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../core/constants.dart';
+import '../widgets/game_ui.dart';
 
 class PauseScreen extends StatelessWidget {
   final VoidCallback onResume;
@@ -15,37 +17,48 @@ class PauseScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black54,
-      body: Center(
-        child: Container(
-          padding: const EdgeInsets.all(24),
-          margin: const EdgeInsets.all(32),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text('Pause',
-                  style: TextStyle(
-                      fontSize: 28, fontWeight: FontWeight.w800)),
-              const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: onResume,
-                child: const Text('Reprendre'),
+      backgroundColor: AppColors.navy.withValues(alpha: 0.72),
+      body: SafeArea(
+        child: Center(
+          child: GamePanel(
+            padding: const EdgeInsets.all(24),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 340),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.pause_circle_filled_rounded,
+                    color: AppColors.blue,
+                    size: 52,
+                  ),
+                  const SizedBox(height: 8),
+                  const GamePageHeading(title: 'Pause'),
+                  const SizedBox(height: 22),
+                  GameActionButton(
+                    label: 'REPRENDRE',
+                    color: AppColors.green,
+                    icon: Icons.play_arrow_rounded,
+                    onPressed: onResume,
+                  ),
+                  const SizedBox(height: 10),
+                  GameActionButton(
+                    label: 'RECOMMENCER',
+                    color: AppColors.blue,
+                    icon: Icons.refresh_rounded,
+                    onPressed: onRestart,
+                  ),
+                  const SizedBox(height: 10),
+                  GameActionButton(
+                    label: 'ACCUEIL',
+                    color: Colors.white,
+                    foregroundColor: AppColors.navy,
+                    icon: Icons.home_rounded,
+                    onPressed: onHome,
+                  ),
+                ],
               ),
-              const SizedBox(height: 8),
-              ElevatedButton(
-                onPressed: onRestart,
-                child: const Text('Recommencer'),
-              ),
-              const SizedBox(height: 8),
-              TextButton(
-                onPressed: onHome,
-                child: const Text('Retour à l\'accueil'),
-              ),
-            ],
+            ),
           ),
         ),
       ),

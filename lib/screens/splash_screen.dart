@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../core/constants.dart';
+import '../widgets/game_ui.dart';
 import 'home_screen.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -24,31 +26,29 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      backgroundColor: Color(0xFFE53935),
-      body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'AG7',
-              style: TextStyle(
-                fontSize: 96,
-                fontWeight: FontWeight.w900,
-                color: Colors.white,
-                letterSpacing: 4,
+    return Scaffold(
+      body: GamePageBackground(
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.asset(
+                'assets/icon/icone_ag7mindclash.png',
+                width: 220,
+                height: 220,
               ),
-            ),
-            Text(
-              'MIND CLASH',
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.w700,
-                color: Colors.white,
-                letterSpacing: 6,
+              const SizedBox(height: 12),
+              const Text(
+                'AG7 MIND CLASH',
+                style: TextStyle(
+                  color: AppColors.navy,
+                  fontSize: 28,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 1.5,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
