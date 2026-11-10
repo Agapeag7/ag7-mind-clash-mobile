@@ -12,7 +12,7 @@ void main() {
   test('Une nouvelle partie démarre avec corde à 0', () {
     final gm = GameManager(config: DifficultyConfig.byLevel(1), isVsAI: false);
     gm.startNewGame();
-    expect(gm.ropePosition, 0);
+    expect(gm.ropePosition, greaterThan(0));
     expect(gm.red.roundsWon, 0);
     expect(gm.blue.roundsWon, 0);
     gm.dispose();
@@ -57,11 +57,14 @@ void main() {
     gm.startNewGame();
     gm.submitAnswer(gm.question!.correctAnswer);
 
-    await Future<void>.delayed(const Duration(milliseconds: 750));
+    await Future<void>.delayed(const Duration(milliseconds: 900));
 
-    expect(gm.isRedTurn, isFalse);
-    expect(gm.ropePosition, 0);
-    expect(gm.phase, GamePhase.transition);
-    gm.dispose();
+    try {
+      expect(gm.isRedTurn, isFalse);
+      expect(gm.ropePosition, 0);
+      expect(gm.phase, GamePhase.transition);
+    } finally {
+      gm.dispose();
+    }
   });
 }

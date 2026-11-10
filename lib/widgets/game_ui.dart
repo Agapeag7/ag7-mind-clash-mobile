@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../core/constants.dart';
 
 class GamePageBackground extends StatelessWidget {
@@ -35,10 +36,10 @@ class GamePageBackground extends StatelessWidget {
   }
 
   Widget _bubble(double size, Color color) => Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-      );
+    width: size,
+    height: size,
+    decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+  );
 }
 
 class GamePageHeading extends StatelessWidget {
@@ -147,55 +148,31 @@ class GameActionButton extends StatelessWidget {
             ? child
             : Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: [Icon(icon, size: 19), const SizedBox(width: 8), child],
+                children: [
+                  Icon(icon, size: 19),
+                  const SizedBox(width: 8),
+                  child,
+                ],
               ),
       ),
     );
   }
 }
 
-class GameCharacterPair extends StatelessWidget {
+class GameModeArtwork extends StatelessWidget {
   final double height;
-  final bool includeRobot;
 
-  const GameCharacterPair({
-    super.key,
-    this.height = 150,
-    this.includeRobot = false,
-  });
+  const GameModeArtwork({super.key, this.height = 150});
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: height,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Expanded(
-            child: Image.asset(
-              'assets/images/characters/red/red_pnj_team_captain.png',
-              fit: BoxFit.contain,
-              height: height,
-            ),
-          ),
-          if (includeRobot)
-            Expanded(
-              child: Image.asset(
-                'assets/images/characters/ia/the_pnj_robot.png',
-                fit: BoxFit.contain,
-                height: height,
-              ),
-            )
-          else
-            Expanded(
-              child: Image.asset(
-                'assets/images/characters/blue/blue_pnj_team_captain.png',
-                fit: BoxFit.contain,
-                height: height,
-              ),
-            ),
-        ],
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(14),
+      child: Image.asset(
+        'assets/icon/icone_ag7mindclash.png',
+        width: height,
+        height: height,
+        fit: BoxFit.cover,
       ),
     );
   }

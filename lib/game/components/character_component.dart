@@ -24,7 +24,7 @@ class CharacterComponent extends PositionComponent {
     Color? teamColorDark,
     this.skinColor = const Color(0xFFFFCC9E),
     this.isLeader = false,
-    double height = 130,
+    double height = 160,
   })  : teamColorDark = teamColorDark ?? _darker(teamColor),
         super(
           position: position,
@@ -89,12 +89,12 @@ class CharacterComponent extends PositionComponent {
       canvas.translate(-cx, -feetY);
     }
 
-    final hipY = feetY - 32;
-    final shoulderY = hipY - 34;
-    final headCenterY = shoulderY - 18;
+    final hipY = feetY - 40;
+    final shoulderY = hipY - 42;
+    final headCenterY = shoulderY - 22;
 
-    _drawLeg(canvas, Offset(cx, hipY), pose.legL, 32, back: true);
-    _drawLeg(canvas, Offset(cx, hipY), pose.legR, 32, back: false);
+    _drawLeg(canvas, Offset(cx - 3, hipY), pose.legL, 40, back: true);
+    _drawLeg(canvas, Offset(cx + 3, hipY), pose.legR, 40, back: false);
 
     canvas.save();
     canvas.translate(cx, hipY);
@@ -137,14 +137,33 @@ class CharacterComponent extends PositionComponent {
       hip.dy + math.cos(angle * 0.75) * length * 0.55,
     );
     final color = back ? _darker(skinColor, 0.15) : skinColor;
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = 8
+    final outline = Paint()
+      ..color = teamColorDark
+      ..strokeWidth = 12
       ..strokeCap = StrokeCap.round;
-    canvas.drawLine(hip, knee, paint);
-    canvas.drawLine(knee, foot, paint);
+    canvas.drawLine(hip, knee, outline);
+    canvas.drawLine(
+      hip,
+      knee,
+      Paint()
+        ..color = teamColor
+        ..strokeWidth = 8
+        ..strokeCap = StrokeCap.round,
+    );
+    canvas.drawLine(
+      knee,
+      foot,
+      Paint()
+        ..color = color
+        ..strokeWidth = 8
+        ..strokeCap = StrokeCap.round,
+    );
     canvas.drawOval(
-      Rect.fromCenter(center: foot, width: 14, height: 8),
+      Rect.fromCenter(
+        center: foot.translate(side == TeamSide.red ? 4 : -4, 1),
+        width: 18,
+        height: 10,
+      ),
       Paint()..color = teamColorDark,
     );
   }

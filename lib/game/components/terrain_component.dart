@@ -1,6 +1,8 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 
+import '../../core/constants.dart';
+
 class TerrainComponent extends PositionComponent {
   final double groundY;
   final double centerX;
@@ -19,7 +21,7 @@ class TerrainComponent extends PositionComponent {
       ..shader = const LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
-        colors: [Color(0xFF6EC1F0), Color(0xFFB3E5FC)],
+        colors: [AppColors.bgTop, AppColors.bgBottom],
       ).createShader(Rect.fromLTWH(0, 0, size.x, groundY));
     canvas.drawRect(Rect.fromLTWH(0, 0, size.x, groundY), sky);
 
@@ -31,10 +33,12 @@ class TerrainComponent extends PositionComponent {
       ..shader = const LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
-        colors: [Color(0xFF7CB342), Color(0xFF558B2F)],
+        colors: [AppColors.groundTop, AppColors.groundBottom],
       ).createShader(Rect.fromLTWH(0, groundY, size.x, size.y - groundY));
     canvas.drawRect(
-        Rect.fromLTWH(0, groundY, size.x, size.y - groundY), ground);
+      Rect.fromLTWH(0, groundY, size.x, size.y - groundY),
+      ground,
+    );
 
     canvas.drawLine(
       Offset(0, groundY),
@@ -50,8 +54,8 @@ class TerrainComponent extends PositionComponent {
       Offset(centerX, groundY - 60),
       Colors.white,
     );
-    _winMarker(canvas, centerX - winLineOffset, const Color(0xFFE53935));
-    _winMarker(canvas, centerX + winLineOffset, const Color(0xFF1E88E5));
+    _winMarker(canvas, centerX - winLineOffset, AppColors.red);
+    _winMarker(canvas, centerX + winLineOffset, AppColors.blue);
   }
 
   void _cloud(Canvas canvas, Offset c, double w) {

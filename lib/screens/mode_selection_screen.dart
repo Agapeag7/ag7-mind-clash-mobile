@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../core/constants.dart';
 import '../core/enums.dart';
 import '../widgets/game_ui.dart';
@@ -28,15 +29,13 @@ class ModeSelectionScreen extends StatelessWidget {
                     _ModeCard(
                       title: 'JOUEUR VS JOUEUR',
                       subtitle: 'Défie un ami sur le même appareil',
-                      includeRobot: false,
                       onTap: () =>
                           _goToDifficulty(context, GameMode.playerVsPlayer),
                     ),
                     const SizedBox(height: 16),
                     _ModeCard(
                       title: 'JOUEUR VS IA',
-                      subtitle: 'Affronte notre robot calculateur',
-                      includeRobot: true,
+                      subtitle: 'Affronte l’équipe bleue contrôlée par l’IA',
                       onTap: () =>
                           _goToDifficulty(context, GameMode.playerVsAI),
                     ),
@@ -53,9 +52,7 @@ class ModeSelectionScreen extends StatelessWidget {
   void _goToDifficulty(BuildContext context, GameMode mode) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (_) => DifficultySelectionScreen(mode: mode),
-      ),
+      MaterialPageRoute(builder: (_) => DifficultySelectionScreen(mode: mode)),
     );
   }
 }
@@ -63,13 +60,11 @@ class ModeSelectionScreen extends StatelessWidget {
 class _ModeCard extends StatelessWidget {
   final String title;
   final String subtitle;
-  final bool includeRobot;
   final VoidCallback onTap;
 
   const _ModeCard({
     required this.title,
     required this.subtitle,
-    required this.includeRobot,
     required this.onTap,
   });
 
@@ -84,7 +79,7 @@ class _ModeCard extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(14, 14, 14, 16),
           child: Column(
             children: [
-              GameCharacterPair(height: 128, includeRobot: includeRobot),
+              GameModeArtwork(height: 128),
               const SizedBox(height: 8),
               Text(
                 title,

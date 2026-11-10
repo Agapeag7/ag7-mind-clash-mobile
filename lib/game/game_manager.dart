@@ -66,6 +66,7 @@ class GameManager extends ChangeNotifier {
 
   Timer? _tick;
   int _aiRequestGeneration = 0;
+  bool _isDisposed = false;
 
   bool get isRedTurn => activeTeam.isRed;
 
@@ -199,11 +200,11 @@ class GameManager extends ChangeNotifier {
         _redRopeFrozen = false;
       }
     } else {
-      if (team.isRed) {
-        _rope = (_rope - delta).clamp(-GameConstants.maxRopePosition, 0.0);
-      } else {
-        _rope = (_rope + delta).clamp(0.0, GameConstants.maxRopePosition);
-      }
+      final pull = team.isRed ? -delta : delta;
+      _rope = (_rope + pull).clamp(
+        -GameConstants.maxRopePosition,
+        GameConstants.maxRopePosition,
+      );
     }
 
     // Drop de bonus (30%)
@@ -277,7 +278,11 @@ class GameManager extends ChangeNotifier {
   }
 
   void _switchTurn() {
-    if (_phase == GamePhase.roundOver || _phase == GamePhase.gameOver) return;
+    if (_isDisposed ||
+        _phase == GamePhase.roundOver ||
+        _phase == GamePhase.gameOver) {
+      return;
+    }
     _startTurn(activeTeam.isRed ? blue : red);
   }
 
@@ -295,7 +300,8 @@ class GameManager extends ChangeNotifier {
 
   Future<void> _respondAsAI(Question question, int requestGeneration) async {
     final answer = await _ai.think(question);
-    if (requestGeneration != _aiRequestGeneration ||
+    if (_isDisposed ||
+        requestGeneration != _aiRequestGeneration ||
         _phase != GamePhase.activeTurn ||
         activeTeam.isRed ||
         !identical(_question, question)) {
@@ -407,6 +413,7 @@ class GameManager extends ChangeNotifier {
 
   @override
   void dispose() {
+    _isDisposed = true;
     _stopTimer();
     _cancelAI();
     super.dispose();

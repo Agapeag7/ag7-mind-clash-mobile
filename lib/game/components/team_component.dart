@@ -14,7 +14,7 @@ class TeamComponent extends PositionComponent {
     required this.side,
     required this.color,
     required List<double> spacing,
-    double charHeight = 130,
+    double charHeight = 160,
   }) : super(position: position) {
     for (var i = 0; i < spacing.length; i++) {
       final isLeader = (side == TeamSide.red && i == spacing.length - 1) ||

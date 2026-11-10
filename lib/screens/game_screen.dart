@@ -29,6 +29,12 @@ class _GameScreenState extends State<GameScreen> {
   double _lastRope = 0;
   bool _handlingEnd = false;
 
+  bool get _canPlayerAnswer =>
+      _gm.phase == GamePhase.activeTurn &&
+      (widget.mode != GameMode.playerVsAI || _gm.isRedTurn);
+  bool get _isAiThinking =>
+      _gm.isVsAI && !_gm.isRedTurn && _gm.phase == GamePhase.activeTurn;
+
   @override
   void initState() {
     super.initState();
@@ -127,13 +133,14 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   void _onNumberTap(String digit) {
-    if (_gm.phase != GamePhase.activeTurn) return;
+    if (!_canPlayerAnswer) return;
     if (_answerController.text.length >= 5) return;
     setState(() => _answerController.text += digit);
     AudioService.tap();
   }
 
   void _onBackspace() {
+    if (!_canPlayerAnswer) return;
     final t = _answerController.text;
     if (t.isEmpty) return;
     setState(() => _answerController.text = t.substring(0, t.length - 1));
@@ -141,12 +148,13 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   void _onClear() {
+    if (!_canPlayerAnswer) return;
     setState(() => _answerController.clear());
     AudioService.tap();
   }
 
   void _onSubmit() {
-    if (_gm.phase != GamePhase.activeTurn) return;
+    if (!_canPlayerAnswer) return;
     if (_answerController.text.isEmpty) return;
     final v = int.tryParse(_answerController.text);
     if (v == null) return;
@@ -181,7 +189,7 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   Future<void> _showPowerUpDialog() async {
-    if (_gm.phase != GamePhase.activeTurn) return;
+    if (!_canPlayerAnswer) return;
     final inv = _gm.isRedTurn ? _gm.redInventory : _gm.blueInventory;
     if (inv.isEmpty) return;
     final chosen = await showDialog<PowerUp>(
@@ -220,42 +228,81 @@ class _GameScreenState extends State<GameScreen> {
 
     return Scaffold(
       body: SafeArea(
-        child: Column(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final arenaHeight = (constraints.maxHeight * 0.34)
+                .clamp(170.0, 250.0)
+                .toDouble();
+            return Column(
+              children: [
+                _buildHeader(activeColor),
+                SizedBox(
+                  height: arenaHeight,
+                  child: _buildArena(constraints.maxWidth),
+                ),
+                Expanded(child: _buildQuestionPanel(activeColor)),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildArena(double availableWidth) {
+    final arenaWidth = availableWidth - 26;
+    final game = _game;
+    final gameHeight =
+        arenaWidth * Ag7Game.virtualSize.y / Ag7Game.virtualSize.x;
+    return Container(
+      margin: const EdgeInsets.fromLTRB(12, 8, 12, 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.panelBorder),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.navy.withValues(alpha: 0.12),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(19),
+        child: Stack(
+          alignment: Alignment.center,
           children: [
-            _buildHeader(activeColor),
-            Expanded(
-              child: Stack(
-                children: [
-                  GameWidget(game: _game),
-                  Positioned(
-                    top: 12,
-                    left: 12,
-                    child: _teamMarker('ÉQUIPE ROUGE', AppColors.red),
-                  ),
-                  Positioned(
-                    top: 12,
-                    right: 56,
-                    child: _teamMarker(
-                      _gm.isVsAI ? 'ÉQUIPE BLEUE · IA' : 'ÉQUIPE BLEUE',
-                      AppColors.blue,
-                    ),
-                  ),
-                  Positioned(
-                    top: 8,
-                    right: 8,
-                    child: IconButton(
-                      icon: const Icon(
-                        Icons.pause_circle_filled,
-                        size: 40,
-                        color: AppColors.navy,
-                      ),
-                      onPressed: _onPause,
-                    ),
-                  ),
-                ],
+            SizedBox(
+              width: arenaWidth,
+              height: gameHeight,
+              child: GameWidget(game: game),
+            ),
+            Positioned(
+              top: 10,
+              left: 10,
+              child: _teamMarker('ROUGE', AppColors.red),
+            ),
+            Positioned(
+              top: 10,
+              right: 54,
+              child: _teamMarker(
+                _gm.isVsAI ? 'BLEU · IA' : 'BLEU',
+                AppColors.blue,
               ),
             ),
-            _buildQuestionPanel(activeColor),
+            Positioned(
+              top: 2,
+              right: 2,
+              child: IconButton(
+                icon: const Icon(
+                  Icons.pause_circle_filled,
+                  size: 36,
+                  color: AppColors.navy,
+                ),
+                onPressed: _onPause,
+              ),
+            ),
           ],
         ),
       ),
@@ -297,7 +344,11 @@ class _GameScreenState extends State<GameScreen> {
             ],
           ),
           const Spacer(),
-          _scoreChip('Bleu', _gm.blue.roundsWon, AppColors.blue),
+          _scoreChip(
+            _gm.isVsAI ? 'IA' : 'Bleu',
+            _gm.blue.roundsWon,
+            AppColors.blue,
+          ),
         ],
       ),
     );
@@ -349,105 +400,171 @@ class _GameScreenState extends State<GameScreen> {
 
   Widget _buildQuestionPanel(Color activeColor) {
     final q = _gm.question;
-    return Container(
-      padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(top: BorderSide(color: AppColors.panelBorder)),
-        boxShadow: [
-          BoxShadow(
-            color: Color(0x140D2444),
-            blurRadius: 10,
-            offset: Offset(0, -3),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: LinearProgressIndicator(
-                  value: _gm.maxTime == 0
-                      ? 0
-                      : (_gm.timeLeft / _gm.maxTime).clamp(0.0, 1.0),
-                  minHeight: 8,
-                  backgroundColor: Colors.black12,
-                  valueColor: AlwaysStoppedAnimation(activeColor),
-                ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact = constraints.maxHeight < 360;
+        final keyHeight = compact ? 34.0 : 40.0;
+        final spacing = compact ? 4.0 : 8.0;
+        return Container(
+          padding: EdgeInsets.fromLTRB(12, compact ? 7 : 10, 12, 8),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            border: Border(top: BorderSide(color: AppColors.panelBorder)),
+            boxShadow: [
+              BoxShadow(
+                color: Color(0x140D2444),
+                blurRadius: 10,
+                offset: Offset(0, -3),
               ),
-              const SizedBox(width: 8),
-              Text(
-                '${_gm.timeLeft.toStringAsFixed(1)}s',
-                style: const TextStyle(
-                  color: AppColors.navy,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Text('♥ ${_gm.attemptsLeft}'),
             ],
           ),
-          const SizedBox(height: 8),
-          Text(
-            q?.expression ?? '—',
-            style: const TextStyle(
-              color: AppColors.navy,
-              fontSize: 32,
-              fontWeight: FontWeight.w900,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            decoration: BoxDecoration(
-              color: AppColors.bgTop,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: activeColor, width: 2),
-            ),
-            child: Text(
-              _answerController.text.isEmpty ? '…' : _answerController.text,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
-            ),
-          ),
-          const SizedBox(height: 8),
-          _buildKeypad(activeColor),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: _gm.phase == GamePhase.activeTurn
-                      ? _showPowerUpDialog
-                      : null,
-                  icon: const Icon(Icons.card_giftcard),
-                  label: const Text('Bonus'),
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.calculate_rounded,
+                      color: AppColors.navy,
+                      size: 18,
+                    ),
+                    const SizedBox(width: 6),
+                    const Text(
+                      'QUESTION & CALCUL',
+                      style: TextStyle(
+                        color: AppColors.navy,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.6,
+                      ),
+                    ),
+                    const Spacer(),
+                    Text(
+                      _isAiThinking ? 'TOUR DE L’IA' : 'À TON TOUR',
+                      style: TextStyle(
+                        color: _isAiThinking ? AppColors.blue : activeColor,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                flex: 2,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: activeColor,
-                    foregroundColor: Colors.white,
+                SizedBox(height: spacing),
+                Row(
+                  children: [
+                    Expanded(
+                      child: LinearProgressIndicator(
+                        value: _gm.maxTime == 0
+                            ? 0
+                            : (_gm.timeLeft / _gm.maxTime).clamp(0.0, 1.0),
+                        minHeight: 8,
+                        backgroundColor: Colors.black12,
+                        valueColor: AlwaysStoppedAnimation(activeColor),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      '${_gm.timeLeft.toStringAsFixed(1)}s',
+                      style: const TextStyle(
+                        color: AppColors.navy,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text('♥ ${_gm.attemptsLeft}'),
+                  ],
+                ),
+                SizedBox(height: spacing),
+                Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.symmetric(vertical: compact ? 4 : 7),
+                  decoration: BoxDecoration(
+                    color: AppColors.bgTop,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: AppColors.panelBorder),
                   ),
-                  onPressed: _gm.phase == GamePhase.activeTurn
-                      ? _onSubmit
-                      : null,
-                  child: const Text('VALIDER'),
+                  child: Text(
+                    q?.expression ?? '—',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: AppColors.navy,
+                      fontSize: compact ? 27 : 32,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
                 ),
-              ),
-            ],
+                SizedBox(height: spacing),
+                Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: compact ? 6 : 10,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.bgTop,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: activeColor, width: 2),
+                  ),
+                  child: Text(
+                    _answerController.text.isEmpty
+                        ? _isAiThinking
+                            ? 'L’IA réfléchit…'
+                            : 'Ta réponse'
+                        : _answerController.text,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: _canPlayerAnswer
+                          ? AppColors.navy
+                          : AppColors.blueDark,
+                      fontSize: compact ? 20 : 24,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                SizedBox(height: spacing),
+                Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: AppColors.bgBottom.withValues(alpha: 0.55),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: AppColors.panelBorder),
+                  ),
+                  child: _buildKeypad(activeColor, keyHeight),
+                ),
+                SizedBox(height: spacing),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: _canPlayerAnswer ? _showPowerUpDialog : null,
+                        icon: const Icon(Icons.card_giftcard, size: 18),
+                        label: const Text('Bonus'),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      flex: 2,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: activeColor,
+                          foregroundColor: Colors.white,
+                          minimumSize: Size.fromHeight(keyHeight + 4),
+                        ),
+                        onPressed: _canPlayerAnswer ? _onSubmit : null,
+                        child: const Text('VALIDER'),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
-  Widget _buildKeypad(Color activeColor) {
+  Widget _buildKeypad(Color activeColor, double keyHeight) {
     final rows = [
       ['1', '2', '3'],
       ['4', '5', '6'],
@@ -463,7 +580,7 @@ class _GameScreenState extends State<GameScreen> {
               child: Padding(
                 padding: const EdgeInsets.all(3),
                 child: SizedBox(
-                  height: 40,
+                  height: keyHeight,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: isAction
@@ -476,7 +593,7 @@ class _GameScreenState extends State<GameScreen> {
                       ),
                       elevation: 1,
                     ),
-                    onPressed: _gm.phase == GamePhase.activeTurn
+                    onPressed: _canPlayerAnswer
                         ? () {
                             if (label == 'C') {
                               _onClear();

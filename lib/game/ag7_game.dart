@@ -1,6 +1,8 @@
 import 'package:flame/components.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
+
+import '../core/constants.dart';
 import '../core/enums.dart';
 import 'components/rope_component.dart';
 import 'components/team_component.dart';
@@ -22,7 +24,7 @@ class Ag7Game extends FlameGame {
   bool _ready = false;
 
   @override
-  Color backgroundColor() => const Color(0xFFB3E5FC);
+  Color backgroundColor() => AppColors.bgBottom;
 
   @override
   Future<void> onLoad() async {
@@ -42,7 +44,7 @@ class Ag7Game extends FlameGame {
     redTeam = TeamComponent(
       position: Vector2(centerX - 340, groundY),
       side: TeamSide.red,
-      color: const Color(0xFFE53935),
+      color: AppColors.red,
       spacing: const [0, 80, 160],
     );
     add(redTeam);
@@ -51,7 +53,7 @@ class Ag7Game extends FlameGame {
     blueTeam = TeamComponent(
       position: Vector2(centerX + 20, groundY),
       side: TeamSide.blue,
-      color: const Color(0xFF1E88E5),
+      color: AppColors.blue,
       spacing: const [0, 80, 160],
     );
     add(blueTeam);
@@ -89,8 +91,9 @@ class Ag7Game extends FlameGame {
   }
 
   void triggerPowerUp(TeamSide side) {
-    (side == TeamSide.red ? redTeam : blueTeam)
-        .playTeam(AnimationState.powerUp);
+    (side == TeamSide.red ? redTeam : blueTeam).playTeam(
+      AnimationState.powerUp,
+    );
   }
 
   void resetRound() {
