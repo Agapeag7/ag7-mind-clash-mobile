@@ -159,8 +159,8 @@ class _BonusTile extends StatelessWidget {
 
   IconData _iconFor(PowerUpType type) => switch (type) {
     PowerUpType.doublePoints => Icons.bolt_rounded,
-    PowerUpType.timeFreeze => Icons.ac_unit_rounded,
-    PowerUpType.shield => Icons.shield_rounded,
+    PowerUpType.timeTheft => Icons.timer_rounded,
+    PowerUpType.illusion => Icons.visibility_off_rounded,
     PowerUpType.autoAnswer => Icons.auto_awesome_rounded,
     PowerUpType.extraAttempt => Icons.favorite_rounded,
     PowerUpType.ropeFreeze => Icons.link_rounded,

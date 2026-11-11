@@ -1,7 +1,7 @@
 # AG7 Mind Clash
 
-Jeu mobile Android de tir à la corde mathématique.
-Personnages cartoon 2D entièrement dessinés en code (aucun asset externe).
+Jeu mobile Android de tir à la corde mathématique, avec personnages cartoon 2D
+dessinés en code et illustrations PNG transparentes pour les modes et résultats.
 
 ## Lancer
 

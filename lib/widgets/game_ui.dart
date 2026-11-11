@@ -126,6 +126,11 @@ class GameActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final borderColor = color == Colors.white
+        ? AppColors.navy.withValues(alpha: 0.55)
+        : foregroundColor == Colors.white
+        ? AppColors.navy.withValues(alpha: 0.42)
+        : AppColors.navy.withValues(alpha: 0.32);
     final child = Text(
       label,
       style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
@@ -141,7 +146,7 @@ class GameActionButton extends StatelessWidget {
           elevation: 3,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
-            side: BorderSide(color: AppColors.navy.withValues(alpha: 0.12)),
+            side: BorderSide(color: borderColor, width: 2),
           ),
         ),
         child: icon == null
@@ -167,64 +172,50 @@ class GameModeArtwork extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       height: height,
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-      decoration: BoxDecoration(
-        color: AppColors.bgTop,
-        borderRadius: BorderRadius.circular(14),
-      ),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          _ModeAvatar(color: AppColors.red, icon: Icons.face_rounded),
           Expanded(
+            child: Image.asset(
+              'assets/images/characters/red/red_team_pnj.png',
+              fit: BoxFit.contain,
+              height: height,
+            ),
+          ),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 8),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
                   Icons.sports_kabaddi_rounded,
-                  color: AppColors.navy.withValues(alpha: 0.75),
-                  size: 28,
+                  color: AppColors.yellow,
+                  size: 30,
                 ),
                 Text(
                   'VS',
                   style: TextStyle(
-                    color: AppColors.navy.withValues(alpha: 0.7),
-                    fontSize: 12,
+                    color: AppColors.navy,
+                    fontSize: 14,
                     fontWeight: FontWeight.w900,
                   ),
                 ),
               ],
             ),
           ),
-          _ModeAvatar(
-            color: AppColors.blue,
-            icon: againstAi ? Icons.smart_toy_rounded : Icons.face_rounded,
+          Expanded(
+            child: Image.asset(
+              againstAi
+                  ? 'assets/images/characters/ia/the_pnj_robot.png'
+                  : 'assets/images/characters/blue/blue_pnj_teammate_1.png',
+              fit: BoxFit.contain,
+              height: height,
+            ),
           ),
         ],
       ),
-    );
-  }
-}
-
-class _ModeAvatar extends StatelessWidget {
-  final Color color;
-  final IconData icon;
-
-  const _ModeAvatar({required this.color, required this.icon});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 66,
-      height: 74,
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.14),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
-      ),
-      child: Icon(icon, color: color, size: 48),
     );
   }
 }

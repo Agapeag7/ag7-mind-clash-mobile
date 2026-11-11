@@ -197,39 +197,6 @@ class _GameScreenState extends State<GameScreen> {
     );
   }
 
-  Future<void> _showPowerUpDialog() async {
-    if (!_canPlayerAnswer) return;
-    final inv = _gm.isRedTurn ? _gm.redInventory : _gm.blueInventory;
-    if (inv.isEmpty) return;
-    final chosen = await showDialog<PowerUp>(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Inventaire'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: inv.items
-              .map(
-                (p) => ListTile(
-                  title: Text(p.name),
-                  subtitle: Text(p.description),
-                  onTap: () => Navigator.pop(context, p),
-                ),
-              )
-              .toList(),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Fermer'),
-          ),
-        ],
-      ),
-    );
-    if (chosen != null) {
-      _gm.usePowerUp(chosen);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final activeTeam = _gm.activeTeam;
@@ -245,10 +212,7 @@ class _GameScreenState extends State<GameScreen> {
             return Column(
               children: [
                 _buildHeader(activeColor),
-                SizedBox(
-                  height: arenaHeight,
-                  child: _buildArena(constraints.maxWidth),
-                ),
+                SizedBox(height: arenaHeight, child: _buildArena()),
                 Expanded(child: _buildQuestionPanel(activeColor)),
               ],
             );
@@ -258,17 +222,14 @@ class _GameScreenState extends State<GameScreen> {
     );
   }
 
-  Widget _buildArena(double availableWidth) {
-    final arenaWidth = availableWidth - 26;
+  Widget _buildArena() {
     final game = _game;
-    final gameHeight =
-        arenaWidth * Ag7Game.virtualSize.y / Ag7Game.virtualSize.x;
     return Container(
       margin: const EdgeInsets.fromLTRB(12, 8, 12, 10),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.panelBorder),
+        border: Border.all(color: AppColors.panelBorder, width: 2),
         boxShadow: [
           BoxShadow(
             color: AppColors.navy.withValues(alpha: 0.12),
@@ -282,11 +243,7 @@ class _GameScreenState extends State<GameScreen> {
         child: Stack(
           alignment: Alignment.center,
           children: [
-            SizedBox(
-              width: arenaWidth,
-              height: gameHeight,
-              child: GameWidget(game: game),
-            ),
+            Positioned.fill(child: GameWidget(game: game)),
             Positioned(
               top: 10,
               left: 10,
@@ -408,7 +365,8 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   Widget _buildQuestionPanel(Color activeColor) {
-    final q = _gm.question;
+    final q = _gm.visibleQuestion;
+    final inventory = _gm.isRedTurn ? _gm.redInventory : _gm.blueInventory;
     return LayoutBuilder(
       builder: (context, constraints) {
         final compact = constraints.maxHeight < 360;
@@ -463,9 +421,12 @@ class _GameScreenState extends State<GameScreen> {
                   children: [
                     Expanded(
                       child: LinearProgressIndicator(
-                        value: _gm.maxTime == 0
+                        value: _gm.turnTimeLimit == 0
                             ? 0
-                            : (_gm.timeLeft / _gm.maxTime).clamp(0.0, 1.0),
+                            : (_gm.timeLeft / _gm.turnTimeLimit).clamp(
+                                0.0,
+                                1.0,
+                              ),
                         minHeight: 8,
                         backgroundColor: Colors.black12,
                         valueColor: AlwaysStoppedAnimation(activeColor),
@@ -483,6 +444,21 @@ class _GameScreenState extends State<GameScreen> {
                     Text('♥ ${_gm.attemptsLeft}'),
                   ],
                 ),
+                if (!inventory.isEmpty) ...[
+                  SizedBox(height: spacing),
+                  SizedBox(
+                    height: 48,
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: inventory.items
+                            .map((powerUp) => _buildPowerUpIcon(powerUp))
+                            .toList(),
+                      ),
+                    ),
+                  ),
+                ],
                 SizedBox(height: spacing),
                 Container(
                   width: double.infinity,
@@ -544,23 +520,25 @@ class _GameScreenState extends State<GameScreen> {
                 Row(
                   children: [
                     Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: _canPlayerAnswer ? _showPowerUpDialog : null,
-                        icon: const Icon(Icons.card_giftcard, size: 18),
-                        label: const Text('Bonus'),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      flex: 2,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: activeColor,
                           foregroundColor: Colors.white,
                           minimumSize: Size.fromHeight(keyHeight + 4),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            side: BorderSide(
+                              color: activeColor.withValues(alpha: 0.7),
+                              width: 2,
+                            ),
+                          ),
+                          elevation: 4,
                         ),
                         onPressed: _canPlayerAnswer ? _onSubmit : null,
-                        child: const Text('VALIDER'),
+                        child: const Text(
+                          'VALIDER',
+                          style: TextStyle(fontWeight: FontWeight.w900),
+                        ),
                       ),
                     ),
                   ],
@@ -570,6 +548,66 @@ class _GameScreenState extends State<GameScreen> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildPowerUpIcon(PowerUp powerUp) {
+    final icon = switch (powerUp.type) {
+      PowerUpType.doublePoints => Icons.bolt_rounded,
+      PowerUpType.timeTheft => Icons.timer_rounded,
+      PowerUpType.illusion => Icons.visibility_off_rounded,
+      PowerUpType.autoAnswer => Icons.auto_awesome_rounded,
+      PowerUpType.extraAttempt => Icons.favorite_rounded,
+      PowerUpType.ropeFreeze => Icons.link_rounded,
+    };
+    final enabled = _canPlayerAnswer;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: Tooltip(
+        message: powerUp.name,
+        child: Semantics(
+          button: true,
+          label: 'Utiliser le bonus ${powerUp.name}',
+          child: SizedBox(
+            width: 48,
+            height: 48,
+            child: InkWell(
+              onTap: enabled ? () => _gm.usePowerUp(powerUp) : null,
+              borderRadius: BorderRadius.circular(12),
+              child: Center(
+                child: Container(
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                    color: enabled
+                        ? AppColors.yellow.withValues(alpha: 0.28)
+                        : AppColors.bgBottom,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: enabled ? AppColors.yellow : AppColors.panelBorder,
+                      width: 2,
+                    ),
+                    boxShadow: enabled
+                        ? const [
+                            BoxShadow(
+                              color: Color(0x1A102348),
+                              blurRadius: 3,
+                              offset: Offset(0, 2),
+                            ),
+                          ]
+                        : null,
+                  ),
+                  child: Icon(
+                    icon,
+                    size: 20,
+                    color: enabled ? AppColors.navy : AppColors.muted,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 

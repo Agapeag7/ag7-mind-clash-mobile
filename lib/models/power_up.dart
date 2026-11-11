@@ -1,7 +1,7 @@
 enum PowerUpType {
   doublePoints,
-  timeFreeze,
-  shield,
+  timeTheft,
+  illusion,
   autoAnswer,
   extraAttempt,
   ropeFreeze,
@@ -25,14 +25,16 @@ class PowerUp {
       description: 'La prochaine bonne réponse déplace la corde de 2.',
     ),
     PowerUp(
-      type: PowerUpType.timeFreeze,
-      name: 'Gel du temps',
-      description: 'Fige le chrono adverse pendant 5 secondes.',
+      type: PowerUpType.timeTheft,
+      name: 'Vol de temps',
+      description:
+          'Au prochain tour adverse, le chronomètre ne garde que 70 % du temps.',
     ),
     PowerUp(
-      type: PowerUpType.shield,
-      name: 'Bouclier',
-      description: 'Annule une mauvaise réponse.',
+      type: PowerUpType.illusion,
+      name: 'Illusion',
+      description:
+          'La bonne question apparaît 3 secondes, puis est remplacée. La réponse attendue reste celle de la question initiale.',
     ),
     PowerUp(
       type: PowerUpType.autoAnswer,

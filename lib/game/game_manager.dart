@@ -42,6 +42,8 @@ class GameManager extends ChangeNotifier {
 
   Question? _question;
   Question? get question => _question;
+  Question? _visibleQuestion;
+  Question? get visibleQuestion => _visibleQuestion ?? _question;
 
   int _attemptsLeft = GameConstants.defaultAttempts;
   int get attemptsLeft => _attemptsLeft;
@@ -49,6 +51,8 @@ class GameManager extends ChangeNotifier {
   double _timeLeft = 0;
   double get timeLeft => _timeLeft;
   double get maxTime => config.secondsPerQuestion;
+  double _turnTimeLimit = 0;
+  double get turnTimeLimit => _turnTimeLimit;
 
   int _roundWinnerSide = -1;
   int get roundWinnerSide => _roundWinnerSide;
@@ -59,12 +63,16 @@ class GameManager extends ChangeNotifier {
   // Power-up flags
   bool _redDoubleNext = false;
   bool _blueDoubleNext = false;
-  bool _redShield = false;
-  bool _blueShield = false;
   bool _redRopeFrozen = false;
   bool _blueRopeFrozen = false;
+  bool _redTimeTheftNext = false;
+  bool _blueTimeTheftNext = false;
+  bool _redIllusionNext = false;
+  bool _blueIllusionNext = false;
 
   Timer? _tick;
+  Timer? _illusionTimer;
+  bool _illusionPending = false;
   int _aiRequestGeneration = 0;
   bool _isDisposed = false;
 
@@ -91,10 +99,12 @@ class GameManager extends ChangeNotifier {
     _roundWinnerSide = -1;
     _redDoubleNext = false;
     _blueDoubleNext = false;
-    _redShield = false;
-    _blueShield = false;
     _redRopeFrozen = false;
     _blueRopeFrozen = false;
+    _redTimeTheftNext = false;
+    _blueTimeTheftNext = false;
+    _redIllusionNext = false;
+    _blueIllusionNext = false;
 
     // Les bonus apparaissent en début de manche
     _maybeDropBonus(red, redInventory);
@@ -117,13 +127,52 @@ class GameManager extends ChangeNotifier {
     _active = team;
     _attemptsLeft = GameConstants.defaultAttempts;
     _question = _generator.generate();
-    _timeLeft = config.secondsPerQuestion;
+    _visibleQuestion = _question;
+    _illusionTimer?.cancel();
+    _illusionPending = false;
+    final timeStolen = team.isRed ? _blueTimeTheftNext : _redTimeTheftNext;
+    if (team.isRed) {
+      _blueTimeTheftNext = false;
+    } else {
+      _redTimeTheftNext = false;
+    }
+    _turnTimeLimit = config.secondsPerQuestion * (timeStolen ? 0.7 : 1);
+    _timeLeft = _turnTimeLimit;
+    final illusionActive = team.isRed ? _blueIllusionNext : _redIllusionNext;
+    if (team.isRed) {
+      _blueIllusionNext = false;
+    } else {
+      _redIllusionNext = false;
+    }
     _phase = GamePhase.activeTurn;
     notifyListeners();
     _startTimer();
+    if (illusionActive) {
+      _scheduleIllusion(_question!);
+    }
     if (isVsAI && !team.isRed) {
       _scheduleAIResponse();
     }
+  }
+
+  void _scheduleIllusion(Question originalQuestion) {
+    _illusionTimer?.cancel();
+    _illusionPending = true;
+    _illusionTimer = Timer(const Duration(seconds: 3), () {
+      if (_isDisposed ||
+          _phase != GamePhase.activeTurn ||
+          !identical(_question, originalQuestion)) {
+        _illusionPending = false;
+        return;
+      }
+      _illusionPending = false;
+      var decoy = _generator.generate();
+      while (decoy.expression == originalQuestion.expression) {
+        decoy = _generator.generate();
+      }
+      _visibleQuestion = decoy;
+      notifyListeners();
+    });
   }
 
   // -------------------------------------------------------------
@@ -150,10 +199,12 @@ class GameManager extends ChangeNotifier {
 
   void _onTimeout() {
     _stopTimer();
+    _illusionTimer?.cancel();
+    _illusionPending = false;
     _phase = GamePhase.answerValidated;
     notifyListeners();
     // Temps écoulé = perte d'une tentative
-    _handleWrongAnswer();
+    _handleWrongAnswer(timedOut: true);
   }
 
   // -------------------------------------------------------------
@@ -168,6 +219,8 @@ class GameManager extends ChangeNotifier {
 
     final correct = answer == _question!.correctAnswer;
     if (correct) {
+      _illusionTimer?.cancel();
+      _illusionPending = false;
       AudioService.correct();
       _handleCorrectAnswer();
     } else {
@@ -227,34 +280,23 @@ class GameManager extends ChangeNotifier {
     Future.delayed(const Duration(milliseconds: 600), _switchTurn);
   }
 
-  void _handleWrongAnswer() {
+  void _handleWrongAnswer({bool timedOut = false}) {
     final team = activeTeam;
-
-    // Bouclier ?
-    final hasShield = team.isRed ? _redShield : _blueShield;
-    if (hasShield) {
-      if (team.isRed) {
-        _redShield = false;
-      } else {
-        _blueShield = false;
-      }
-      _phase = GamePhase.activeTurn;
-      _timeLeft = config.secondsPerQuestion;
-      notifyListeners();
-      _startTimer();
-      return;
-    }
 
     _attemptsLeft--;
     if (_attemptsLeft > 0) {
       _phase = GamePhase.activeTurn;
-      _timeLeft = config.secondsPerQuestion;
+      if (timedOut) {
+        _timeLeft = _turnTimeLimit;
+      }
       notifyListeners();
       _startTimer();
       if (isVsAI && !team.isRed) {
         _scheduleAIResponse();
       }
     } else {
+      _illusionTimer?.cancel();
+      _illusionPending = false;
       // Perdu le tour, la corde va vers l'adversaire
       if (team.isRed) {
         _rope = (_rope + 1.0).clamp(
@@ -356,11 +398,18 @@ class GameManager extends ChangeNotifier {
           _blueDoubleNext = true;
         }
         break;
-      case PowerUpType.shield:
+      case PowerUpType.timeTheft:
         if (activeTeam.isRed) {
-          _redShield = true;
+          _redTimeTheftNext = true;
         } else {
-          _blueShield = true;
+          _blueTimeTheftNext = true;
+        }
+        break;
+      case PowerUpType.illusion:
+        if (activeTeam.isRed) {
+          _redIllusionNext = true;
+        } else {
+          _blueIllusionNext = true;
         }
         break;
       case PowerUpType.extraAttempt:
@@ -373,14 +422,9 @@ class GameManager extends ChangeNotifier {
           _redRopeFrozen = true;
         }
         break;
-      case PowerUpType.timeFreeze:
-        // Effet simplifié : +5 secondes pour l'équipe
-        _timeLeft += 5;
-        break;
       case PowerUpType.autoAnswer:
         if (_question != null) {
-          _timeLeft += 0;
-          notifyListeners();
+          submitAnswer(_question!.correctAnswer);
         }
         break;
     }
@@ -396,6 +440,7 @@ class GameManager extends ChangeNotifier {
   void pause() {
     if (_phase != GamePhase.activeTurn) return;
     _stopTimer();
+    _illusionTimer?.cancel();
     _cancelAI();
     _phase = GamePhase.paused;
     notifyListeners();
@@ -405,6 +450,9 @@ class GameManager extends ChangeNotifier {
     if (_phase != GamePhase.paused) return;
     _phase = GamePhase.activeTurn;
     _startTimer();
+    if (_illusionPending && _question != null) {
+      _scheduleIllusion(_question!);
+    }
     if (isVsAI && !activeTeam.isRed) {
       _scheduleAIResponse();
     }
@@ -415,6 +463,7 @@ class GameManager extends ChangeNotifier {
   void dispose() {
     _isDisposed = true;
     _stopTimer();
+    _illusionTimer?.cancel();
     _cancelAI();
     super.dispose();
   }

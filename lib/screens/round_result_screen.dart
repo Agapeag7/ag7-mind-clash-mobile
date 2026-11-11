@@ -20,6 +20,7 @@ class RoundResultScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final winner = roundWinnerRed ? 'ROUGE' : 'BLEU';
     final winnerColor = roundWinnerRed ? AppColors.red : AppColors.blue;
+    final loserColor = roundWinnerRed ? AppColors.blue : AppColors.red;
 
     return Scaffold(
       body: GamePageBackground(
@@ -60,12 +61,58 @@ class RoundResultScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      Image.asset(
-                        roundWinnerRed
-                            ? 'assets/images/characters/red/red_pnj_victory.png'
-                            : 'assets/images/characters/blue/blue_pnj_victory.png',
-                        height: 160,
-                        fit: BoxFit.contain,
+                      SizedBox(
+                        height: 150,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                children: [
+                                  Expanded(
+                                    child: Image.asset(
+                                      roundWinnerRed
+                                          ? 'assets/images/characters/red/red_pnj_victory.png'
+                                          : 'assets/images/characters/blue/blue_pnj_victory.png',
+                                      fit: BoxFit.contain,
+                                    ),
+                                  ),
+                                  Text(
+                                    'GAGNANT',
+                                    style: TextStyle(
+                                      color: winnerColor,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w900,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Column(
+                                children: [
+                                  Expanded(
+                                    child: Image.asset(
+                                      roundWinnerRed
+                                          ? 'assets/images/characters/blue/blue_pnj_loose.png'
+                                          : 'assets/images/characters/red/red_pnj_loose.png',
+                                      fit: BoxFit.contain,
+                                    ),
+                                  ),
+                                  Text(
+                                    'PERDANT',
+                                    style: TextStyle(
+                                      color: loserColor,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w900,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                       const SizedBox(height: 8),
                       Container(
