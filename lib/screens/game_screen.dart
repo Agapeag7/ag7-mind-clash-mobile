@@ -76,6 +76,9 @@ class _GameScreenState extends State<GameScreen> {
       redReaction: redReaction,
       blueReaction: blueReaction,
     );
+    if (_gm.phase == GamePhase.activeTurn) {
+      _game.setTugging(_gm.isRedTurn ? TeamSide.red : TeamSide.blue);
+    }
 
     if (_gm.phase == GamePhase.roundOver && !_handlingEnd) {
       _handlingEnd = true;

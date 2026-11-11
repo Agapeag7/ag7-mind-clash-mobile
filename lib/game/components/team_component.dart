@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import '../../core/enums.dart';
@@ -24,6 +23,7 @@ class TeamComponent extends PositionComponent {
         side: side,
         teamColor: color,
         isLeader: isLeader,
+        phaseOffset: i * 0.09,
         height: charHeight,
       );
       members.add(c);
@@ -31,16 +31,13 @@ class TeamComponent extends PositionComponent {
     }
   }
 
-  void playTeam(AnimationState state, {bool hold = false}) {
-    for (var i = 0; i < members.length; i++) {
-      final delay = i * 0.045;
-      if (delay <= 0) {
-        members[i].play(state, hold: hold);
-      } else {
-        Future.delayed(Duration(milliseconds: (delay * 1000).round()), () {
-          members[i].play(state, hold: hold);
-        });
-      }
+  void playTeam(
+    AnimationState state, {
+    bool hold = false,
+    AnimationState? returnTo,
+  }) {
+    for (final member in members) {
+      member.play(state, hold: hold, returnTo: returnTo);
     }
   }
 

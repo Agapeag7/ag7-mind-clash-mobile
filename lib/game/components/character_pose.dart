@@ -33,20 +33,21 @@ class CharacterPose {
 
   static CharacterPose lerp(CharacterPose a, CharacterPose b, double t) {
     t = t.clamp(0.0, 1.0);
+    final eased = t * t * (3 - 2 * t);
     return CharacterPose(
-      bodyLean: _l(a.bodyLean, b.bodyLean, t),
-      headTilt: _l(a.headTilt, b.headTilt, t),
-      armL: _l(a.armL, b.armL, t),
-      armR: _l(a.armR, b.armR, t),
-      legL: _l(a.legL, b.legL, t),
-      legR: _l(a.legR, b.legR, t),
-      verticalOffset: _l(a.verticalOffset, b.verticalOffset, t),
-      horizontalOffset: _l(a.horizontalOffset, b.horizontalOffset, t),
-      squash: _l(a.squash, b.squash, t),
+      bodyLean: _l(a.bodyLean, b.bodyLean, eased),
+      headTilt: _l(a.headTilt, b.headTilt, eased),
+      armL: _l(a.armL, b.armL, eased),
+      armR: _l(a.armR, b.armR, eased),
+      legL: _l(a.legL, b.legL, eased),
+      legR: _l(a.legR, b.legR, eased),
+      verticalOffset: _l(a.verticalOffset, b.verticalOffset, eased),
+      horizontalOffset: _l(a.horizontalOffset, b.horizontalOffset, eased),
+      squash: _l(a.squash, b.squash, eased),
       eyes: t < 0.5 ? a.eyes : b.eyes,
       mouth: t < 0.5 ? a.mouth : b.mouth,
-      glow: _l(a.glow, b.glow, t),
-      sweat: _l(a.sweat, b.sweat, t),
+      glow: _l(a.glow, b.glow, eased),
+      sweat: _l(a.sweat, b.sweat, eased),
     );
   }
 

@@ -22,6 +22,7 @@ class Ag7Game extends FlameGame {
   double pixelsPerUnit = 0;
 
   bool _ready = false;
+  TeamSide? _activeSide;
 
   @override
   Color backgroundColor() => AppColors.bgBottom;
@@ -67,6 +68,16 @@ class Ag7Game extends FlameGame {
     add(rope);
 
     _ready = true;
+    setTugging(TeamSide.red);
+  }
+
+  void setTugging(TeamSide activeSide) {
+    if (!_ready || _activeSide == activeSide) return;
+    _activeSide = activeSide;
+    final activeTeam = activeSide == TeamSide.red ? redTeam : blueTeam;
+    final resistingTeam = activeSide == TeamSide.red ? blueTeam : redTeam;
+    activeTeam.playTeam(AnimationState.pull);
+    resistingTeam.playTeam(AnimationState.struggle);
   }
 
   void setRopePosition(
@@ -76,8 +87,29 @@ class Ag7Game extends FlameGame {
   }) {
     if (!_ready) return;
     rope.setPosition(pos);
-    if (redReaction != null) redTeam.playTeam(redReaction);
-    if (blueReaction != null) blueTeam.playTeam(blueReaction);
+    final pullingSide = _activeSide ?? TeamSide.red;
+    final pullingAnimation = pullingSide == TeamSide.red
+        ? AnimationState.pull
+        : AnimationState.struggle;
+    final resistingAnimation = pullingSide == TeamSide.red
+        ? AnimationState.struggle
+        : AnimationState.pull;
+    if (redReaction != null) {
+      redTeam.playTeam(
+        redReaction,
+        returnTo: pullingSide == TeamSide.red
+            ? pullingAnimation
+            : resistingAnimation,
+      );
+    }
+    if (blueReaction != null) {
+      blueTeam.playTeam(
+        blueReaction,
+        returnTo: pullingSide == TeamSide.blue
+            ? pullingAnimation
+            : resistingAnimation,
+      );
+    }
   }
 
   void triggerVictory(TeamSide winner) {
@@ -100,5 +132,7 @@ class Ag7Game extends FlameGame {
     rope.setPosition(0);
     redTeam.resetTeam();
     blueTeam.resetTeam();
+    _activeSide = null;
+    setTugging(TeamSide.red);
   }
 }

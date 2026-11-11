@@ -31,45 +31,180 @@ class CharacterAnimations {
 
   static final idle = AnimationDefinition(const [
     (time: 0.0, pose: base),
-    (time: 0.6, pose: CharacterPose(verticalOffset: 1.5)),
+    (
+      time: 0.6,
+      pose: CharacterPose(verticalOffset: 1.5, headTilt: -0.025),
+    ),
     (time: 1.2, pose: base),
   ], loop: true);
 
   static final pull = AnimationDefinition(const [
-    (time: 0.0, pose: base),
     (
-      time: 0.12,
+      time: 0.0,
       pose: CharacterPose(
-        bodyLean: -0.30,
-        armL: 1.55,
-        armR: 1.60,
-        legL: -0.40,
-        legR: 0.35,
+        bodyLean: -0.28,
+        headTilt: 0.04,
+        armL: 1.45,
+        armR: 1.58,
+        legL: -0.32,
+        legR: 0.40,
         eyes: EyeState.determined,
         mouth: MouthState.gritted,
       )
     ),
     (
-      time: 0.35,
+      time: 0.18,
       pose: CharacterPose(
-        bodyLean: -0.20,
-        armL: 1.50,
-        armR: 1.55,
-        legL: -0.35,
-        legR: 0.30,
+        bodyLean: -0.62,
+        headTilt: -0.08,
+        armL: 1.72,
+        armR: 1.82,
+        legL: -0.52,
+        legR: 0.56,
+        verticalOffset: -2,
+        horizontalOffset: -3,
+        squash: 0.94,
         eyes: EyeState.determined,
+        mouth: MouthState.gritted,
       )
     ),
-  ]);
+    (
+      time: 0.40,
+      pose: CharacterPose(
+        bodyLean: -0.50,
+        headTilt: 0.03,
+        armL: 1.62,
+        armR: 1.72,
+        legL: -0.40,
+        legR: 0.47,
+        verticalOffset: 1,
+        horizontalOffset: -1,
+        squash: 0.98,
+        eyes: EyeState.determined,
+        mouth: MouthState.gritted,
+      )
+    ),
+    (
+      time: 0.62,
+      pose: CharacterPose(
+        bodyLean: -0.22,
+        armL: 1.38,
+        armR: 1.48,
+        legL: -0.28,
+        legR: 0.35,
+        verticalOffset: 2,
+        eyes: EyeState.determined,
+        mouth: MouthState.gritted,
+      )
+    ),
+    (
+      time: 0.88,
+      pose: CharacterPose(
+        bodyLean: -0.28,
+        headTilt: 0.04,
+        armL: 1.45,
+        armR: 1.58,
+        legL: -0.32,
+        legR: 0.40,
+        eyes: EyeState.determined,
+        mouth: MouthState.gritted,
+      )
+    ),
+  ], loop: true);
+
+  static final struggle = AnimationDefinition(const [
+    (
+      time: 0.0,
+      pose: CharacterPose(
+        bodyLean: -0.20,
+        headTilt: 0.06,
+        armL: 1.38,
+        armR: 1.54,
+        legL: -0.26,
+        legR: 0.34,
+        eyes: EyeState.determined,
+        mouth: MouthState.gritted,
+        sweat: 0.25,
+      )
+    ),
+    (
+      time: 0.24,
+      pose: CharacterPose(
+        bodyLean: -0.38,
+        headTilt: -0.08,
+        armL: 1.56,
+        armR: 1.70,
+        legL: -0.42,
+        legR: 0.45,
+        verticalOffset: -1,
+        eyes: EyeState.sad,
+        mouth: MouthState.gritted,
+        sweat: 0.75,
+      )
+    ),
+    (
+      time: 0.48,
+      pose: CharacterPose(
+        bodyLean: -0.24,
+        headTilt: 0.10,
+        armL: 1.43,
+        armR: 1.58,
+        legL: -0.30,
+        legR: 0.38,
+        eyes: EyeState.determined,
+        mouth: MouthState.gritted,
+        sweat: 0.5,
+      )
+    ),
+    (
+      time: 0.72,
+      pose: CharacterPose(
+        bodyLean: -0.32,
+        headTilt: -0.02,
+        armL: 1.50,
+        armR: 1.65,
+        legL: -0.36,
+        legR: 0.42,
+        eyes: EyeState.sad,
+        mouth: MouthState.gritted,
+        sweat: 0.7,
+      )
+    ),
+    (
+      time: 0.96,
+      pose: CharacterPose(
+        bodyLean: -0.20,
+        headTilt: 0.06,
+        armL: 1.38,
+        armR: 1.54,
+        legL: -0.26,
+        legR: 0.34,
+        eyes: EyeState.determined,
+        mouth: MouthState.gritted,
+        sweat: 0.25,
+      )
+    ),
+  ], loop: true);
 
   static final strongPull = AnimationDefinition(const [
-    (time: 0.0, pose: base),
+    (
+      time: 0.0,
+      pose: CharacterPose(
+        bodyLean: -0.30,
+        armL: 1.45,
+        armR: 1.58,
+        legL: -0.32,
+        legR: 0.40,
+        eyes: EyeState.determined,
+        mouth: MouthState.gritted,
+      )
+    ),
     (
       time: 0.10,
       pose: CharacterPose(
         bodyLean: 0.10,
-        armL: 1.20,
-        armR: 1.25,
+        armL: 1.25,
+        armR: 1.35,
         squash: 0.95,
       )
     ),
@@ -77,10 +212,13 @@ class CharacterAnimations {
       time: 0.28,
       pose: CharacterPose(
         bodyLean: -0.55,
-        armL: 1.60,
-        armR: 1.65,
+        headTilt: -0.10,
+        armL: 1.76,
+        armR: 1.86,
         legL: -0.55,
         legR: 0.50,
+        verticalOffset: -3,
+        horizontalOffset: -4,
         eyes: EyeState.determined,
         mouth: MouthState.gritted,
         squash: 0.93,
@@ -90,68 +228,27 @@ class CharacterAnimations {
       time: 0.50,
       pose: CharacterPose(
         bodyLean: -0.40,
-        armL: 1.55,
-        armR: 1.60,
+        armL: 1.66,
+        armR: 1.76,
         legL: -0.45,
         legR: 0.40,
         eyes: EyeState.determined,
+        mouth: MouthState.gritted,
       )
     ),
     (
       time: 0.70,
       pose: CharacterPose(
-        bodyLean: -0.25,
-        armL: 1.50,
-        armR: 1.55,
-        legL: -0.35,
-        legR: 0.30,
+        bodyLean: -0.30,
+        armL: 1.46,
+        armR: 1.58,
+        legL: -0.32,
+        legR: 0.38,
         eyes: EyeState.determined,
+        mouth: MouthState.gritted,
       )
     ),
   ]);
-
-  static final struggle = AnimationDefinition(const [
-    (
-      time: 0.0,
-      pose: CharacterPose(
-        bodyLean: 0.20,
-        armL: 1.60,
-        armR: 1.70,
-        legL: 0.10,
-        legR: 0.40,
-        eyes: EyeState.sad,
-        mouth: MouthState.gritted,
-        sweat: 0.7,
-      )
-    ),
-    (
-      time: 0.20,
-      pose: CharacterPose(
-        bodyLean: 0.30,
-        armL: 1.55,
-        armR: 1.75,
-        legL: 0.15,
-        legR: 0.45,
-        eyes: EyeState.sad,
-        mouth: MouthState.gritted,
-        sweat: 1.0,
-        horizontalOffset: 2,
-      )
-    ),
-    (
-      time: 0.40,
-      pose: CharacterPose(
-        bodyLean: 0.20,
-        armL: 1.60,
-        armR: 1.70,
-        legL: 0.10,
-        legR: 0.40,
-        eyes: EyeState.sad,
-        mouth: MouthState.gritted,
-        sweat: 0.7,
-      )
-    ),
-  ], loop: true);
 
   static final slip = AnimationDefinition(const [
     (time: 0.0, pose: base),

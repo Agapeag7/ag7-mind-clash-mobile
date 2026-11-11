@@ -12,10 +12,12 @@ class CharacterComponent extends PositionComponent {
   final Color teamColorDark;
   final Color skinColor;
   final bool isLeader;
+  final double phaseOffset;
 
   AnimationState _state = AnimationState.idle;
   double _stateTime = 0;
   bool _forcedHold = false;
+  AnimationState? _returnState;
 
   CharacterComponent({
     required Vector2 position,
@@ -24,6 +26,7 @@ class CharacterComponent extends PositionComponent {
     Color? teamColorDark,
     this.skinColor = const Color(0xFFFFCC9E),
     this.isLeader = false,
+    this.phaseOffset = 0,
     double height = 160,
   })  : teamColorDark = teamColorDark ?? _darker(teamColor),
         super(
@@ -32,20 +35,31 @@ class CharacterComponent extends PositionComponent {
           anchor: Anchor.bottomCenter,
         );
 
-  void play(AnimationState state, {bool hold = false}) {
-    if (_state == state && !_forcedHold) return;
+  void play(
+    AnimationState state, {
+    bool hold = false,
+    AnimationState? returnTo,
+  }) {
+    if (_state == state && !_forcedHold) {
+      _returnState = returnTo;
+      return;
+    }
     _state = state;
-    _stateTime = 0;
+    _stateTime = phaseOffset;
     _forcedHold = hold;
+    _returnState = returnTo;
   }
 
   @override
   void update(double dt) {
     super.update(dt);
     _stateTime += dt;
+    if (_stateTime < 0) return;
     final def = CharacterAnimations.forState(_state);
     if (!def.loop && _stateTime > def.duration + 0.05 && !_forcedHold) {
-      play(AnimationState.idle);
+      final nextState = _returnState ?? AnimationState.idle;
+      _returnState = null;
+      play(nextState);
     }
   }
 
@@ -195,27 +209,40 @@ class CharacterComponent extends PositionComponent {
     double angle, {
     required bool back,
   }) {
-    const length = 23.0;
+    const upperLength = 17.0;
+    const forearmLength = 15.0;
     final shoulder = Offset(shoulderX, shoulderY);
-    final hand = Offset(
-      shoulderX + math.sin(angle) * length,
-      shoulderY + math.cos(angle) * length,
-    );
     final elbow = Offset(
-      shoulderX + math.sin(angle * 0.85) * length * 0.55,
-      shoulderY + math.cos(angle * 0.85) * length * 0.55,
+      shoulderX + math.sin(angle) * upperLength,
+      shoulderY + math.cos(angle) * upperLength,
+    );
+    final forearmAngle = angle + (back ? -0.48 : 0.48);
+    final hand = Offset(
+      elbow.dx + math.sin(forearmAngle) * forearmLength,
+      elbow.dy + math.cos(forearmAngle) * forearmLength,
     );
     final color = back ? _darker(skinColor, 0.15) : skinColor;
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = 7
+    final outline = Paint()
+      ..color = teamColorDark
+      ..strokeWidth = 9
       ..strokeCap = StrokeCap.round;
-    canvas.drawLine(shoulder, elbow, paint);
-    canvas.drawLine(elbow, hand, paint);
-    canvas.drawCircle(hand, 4.5, Paint()..color = color);
+    final upper = Paint()
+      ..color = color
+      ..strokeWidth = 6.5
+      ..strokeCap = StrokeCap.round;
+    final forearm = Paint()
+      ..color = color
+      ..strokeWidth = 6
+      ..strokeCap = StrokeCap.round;
+    canvas.drawLine(shoulder, elbow, outline);
+    canvas.drawLine(elbow, hand, outline);
+    canvas.drawLine(shoulder, elbow, upper);
+    canvas.drawLine(elbow, hand, forearm);
+    canvas.drawCircle(elbow, 3.8, Paint()..color = color);
+    canvas.drawCircle(hand, 5, Paint()..color = color);
     canvas.drawCircle(
       hand,
-      4.5,
+      5,
       Paint()
         ..color = _darker(color, 0.2)
         ..style = PaintingStyle.stroke
