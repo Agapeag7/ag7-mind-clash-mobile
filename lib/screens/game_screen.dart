@@ -11,6 +11,7 @@ import '../game/ag7_game.dart';
 import '../game/game_manager.dart';
 import '../models/power_up.dart';
 import '../services/audio_service.dart';
+import '../services/storage_service.dart';
 import 'game_result_screen.dart';
 import 'pause_screen.dart';
 import 'round_result_screen.dart';
@@ -31,6 +32,7 @@ class _GameScreenState extends State<GameScreen> {
   final TextEditingController _answerController = TextEditingController();
   double _lastRope = 0;
   bool _handlingEnd = false;
+  bool _statsSaved = false;
 
   bool get _canPlayerAnswer =>
       _gm.phase == GamePhase.activeTurn &&
@@ -136,8 +138,15 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   Future<void> _showGameResult() async {
+    if (!mounted || _statsSaved) return;
+    _statsSaved = true;
+    await StorageService.recordGameResult(
+      won: _gm.gameWinnerSide == 0,
+      correctAnswers: _gm.correctAnswers,
+      totalAnswers: _gm.totalAnswers,
+    );
     if (!mounted) return;
-    await Navigator.push(
+    await Navigator.push<void>(
       context,
       MaterialPageRoute(
         builder: (_) => GameResultScreen(
@@ -147,7 +156,9 @@ class _GameScreenState extends State<GameScreen> {
         ),
       ),
     );
-    if (mounted) Navigator.pop(context);
+    if (mounted) {
+      Navigator.of(context).popUntil((route) => route.isFirst);
+    }
   }
 
   void _onNumberTap(String digit) {
@@ -219,19 +230,11 @@ class _GameScreenState extends State<GameScreen> {
 
     return Scaffold(
       body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final arenaHeight = (constraints.maxHeight * 0.21)
-              .clamp(110.0, 170.0)
-                .toDouble();
-            return Column(
-              children: [
-                _buildHeader(activeColor),
-                SizedBox(height: arenaHeight, child: _buildArena()),
-                Expanded(child: _buildQuestionPanel(activeColor)),
-              ],
-            );
-          },
+        child: Column(
+          children: [
+            _buildHeader(activeColor),
+            Expanded(child: _buildQuestionPanel(activeColor)),
+          ],
         ),
       ),
     );
@@ -240,54 +243,50 @@ class _GameScreenState extends State<GameScreen> {
   Widget _buildArena() {
     final game = _game;
     return Container(
-      margin: const EdgeInsets.fromLTRB(12, 8, 12, 10),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.panelBorder, width: 2),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.panelBorder),
         boxShadow: [
           BoxShadow(
-            color: AppColors.navy.withValues(alpha: 0.12),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: AppColors.navy.withValues(alpha: 0.08),
+            blurRadius: 5,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(19),
-        child: Center(
-          child: AspectRatio(
-            aspectRatio: 16 / 9,
-            child: Stack(
-              children: [
-                Positioned.fill(child: GameWidget(game: game)),
-                Positioned(
-                  top: 10,
-                  left: 10,
-                  child: _teamMarker('ROUGE', AppColors.red),
+        borderRadius: BorderRadius.circular(11),
+        child: AspectRatio(
+          aspectRatio: Ag7Game.virtualSize.x / Ag7Game.virtualSize.y,
+          child: Stack(
+            children: [
+              Positioned.fill(child: GameWidget(game: game)),
+              Positioned(
+                top: 4,
+                left: 6,
+                child: _teamMarker('ROUGE', AppColors.red),
+              ),
+              Positioned(
+                top: 4,
+                right: 46,
+                child: _teamMarker(
+                  _gm.isVsAI ? 'BLEU · IA' : 'BLEU',
+                  AppColors.blue,
                 ),
-                Positioned(
-                  top: 10,
-                  right: 54,
-                  child: _teamMarker(
-                    _gm.isVsAI ? 'BLEU · IA' : 'BLEU',
-                    AppColors.blue,
+              ),
+              Positioned(
+                top: -6,
+                right: -6,
+                child: IconButton(
+                  icon: const Icon(
+                    Icons.pause_circle_filled,
+                    size: 32,
+                    color: AppColors.navy,
                   ),
+                  onPressed: _onPause,
                 ),
-                Positioned(
-                  top: 2,
-                  right: 2,
-                  child: IconButton(
-                    icon: const Icon(
-                      Icons.pause_circle_filled,
-                      size: 36,
-                      color: AppColors.navy,
-                    ),
-                    onPressed: _onPause,
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -390,7 +389,7 @@ class _GameScreenState extends State<GameScreen> {
       builder: (context, constraints) {
         final compact = constraints.maxHeight < 420;
         final spacing = compact ? 4.0 : 8.0;
-        final reservedHeight = inventory.isEmpty ? 190.0 : 228.0;
+        const reservedHeight = 286.0;
         final keyHeight = compact
             ? ((constraints.maxHeight - reservedHeight) / 4)
                   .clamp(24.0, 44.0)
@@ -445,6 +444,11 @@ class _GameScreenState extends State<GameScreen> {
                   ),
                 ],
               ),
+              SizedBox(height: compact ? 3 : 6),
+              SizedBox(
+                height: compact ? 76 : 90,
+                child: Center(child: _buildArena()),
+              ),
               SizedBox(height: spacing),
               Row(
                 children: [
@@ -470,24 +474,39 @@ class _GameScreenState extends State<GameScreen> {
                   Text('♥ ${_gm.attemptsLeft}'),
                 ],
               ),
-              if (!inventory.isEmpty) ...[
-                SizedBox(height: spacing),
-                SizedBox(
-                  height: compact ? 30 : 48,
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: inventory.items
-                          .map(
-                            (powerUp) =>
-                                _buildPowerUpIcon(powerUp, compact: compact),
-                          )
-                          .toList(),
-                    ),
-                  ),
+              SizedBox(height: spacing),
+              Container(
+                height: compact ? 30 : 48,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: AppColors.bgBottom.withValues(alpha: 0.35),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppColors.panelBorder),
                 ),
-              ],
+                child: inventory.isEmpty
+                    ? Text(
+                        'Aucun bonus',
+                        style: TextStyle(
+                          color: AppColors.muted,
+                          fontSize: compact ? 9 : 11,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      )
+                    : FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: inventory.items
+                              .map(
+                                (powerUp) => _buildPowerUpIcon(
+                                  powerUp,
+                                  compact: compact,
+                                ),
+                              )
+                              .toList(),
+                        ),
+                      ),
+              ),
               SizedBox(height: spacing),
               Container(
                 width: double.infinity,

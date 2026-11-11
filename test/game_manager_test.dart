@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ag7_mind_clash/core/difficulty.dart';
@@ -30,6 +32,18 @@ void main() {
     gm.dispose();
   });
 
+  test('Les compteurs suivent les réponses correctes et incorrectes', () {
+    final gm = GameManager(config: DifficultyConfig.byLevel(1), isVsAI: false);
+    gm.startNewGame();
+
+    gm.submitAnswer(gm.question!.correctAnswer + 999);
+    gm.submitAnswer(gm.question!.correctAnswer);
+
+    expect(gm.totalAnswers, 2);
+    expect(gm.correctAnswers, 1);
+    gm.dispose();
+  });
+
   test('Deux mauvaises réponses passent le tour', () {
     final gm = GameManager(config: DifficultyConfig.byLevel(1), isVsAI: false);
     gm.startNewGame();
@@ -55,6 +69,46 @@ void main() {
     gm.dispose();
   });
 
+  test(
+    'Le chrono écoulé passe le tour même avec des tentatives restantes',
+    () async {
+      final gm = GameManager(
+        config: const DifficultyConfig(
+          level: 1,
+          name: 'Test',
+          description: 'Chrono court',
+          secondsPerQuestion: 0.2,
+          aiAccuracy: 0.55,
+          aiMinDelay: 3,
+          aiMaxDelay: 6,
+        ),
+        isVsAI: false,
+      );
+      final transition = Completer<void>();
+      void watchTransition() {
+        if (gm.phase == GamePhase.transition && !transition.isCompleted) {
+          transition.complete();
+        }
+      }
+
+      gm.addListener(watchTransition);
+      gm.startNewGame();
+      try {
+        await transition.future.timeout(const Duration(seconds: 3));
+
+        expect(gm.attemptsLeft, greaterThan(1));
+        expect(gm.ropePosition, greaterThan(0));
+        expect(gm.totalAnswers, 1);
+
+        await Future<void>.delayed(const Duration(milliseconds: 650));
+        expect(gm.isRedTurn, isFalse);
+      } finally {
+        gm.removeListener(watchTransition);
+        gm.dispose();
+      }
+    },
+  );
+
   test('Le vol de temps réduit le prochain tour adverse à 70 %', () async {
     final gm = GameManager(config: DifficultyConfig.byLevel(1), isVsAI: false);
     gm.startNewGame();
@@ -72,31 +126,37 @@ void main() {
     gm.dispose();
   });
 
-  test('L’illusion masque la question sans changer la réponse attendue', () async {
-    final gm = GameManager(config: DifficultyConfig.byLevel(1), isVsAI: false);
-    gm.startNewGame();
-    final bonus = PowerUp.catalog.singleWhere(
-      (powerUp) => powerUp.type == PowerUpType.illusion,
-    );
-    gm.redInventory.add(bonus);
+  test(
+    'L’illusion masque la question sans changer la réponse attendue',
+    () async {
+      final gm = GameManager(
+        config: DifficultyConfig.byLevel(1),
+        isVsAI: false,
+      );
+      gm.startNewGame();
+      final bonus = PowerUp.catalog.singleWhere(
+        (powerUp) => powerUp.type == PowerUpType.illusion,
+      );
+      gm.redInventory.add(bonus);
 
-    expect(gm.usePowerUp(bonus), isTrue);
-    gm.submitAnswer(gm.question!.correctAnswer);
-    await Future<void>.delayed(const Duration(milliseconds: 650));
-    final originalQuestion = gm.question!;
+      expect(gm.usePowerUp(bonus), isTrue);
+      gm.submitAnswer(gm.question!.correctAnswer);
+      await Future<void>.delayed(const Duration(milliseconds: 650));
+      final originalQuestion = gm.question!;
 
-    expect(gm.visibleQuestion, same(originalQuestion));
-    await Future<void>.delayed(const Duration(milliseconds: 3100));
+      expect(gm.visibleQuestion, same(originalQuestion));
+      await Future<void>.delayed(const Duration(milliseconds: 3100));
 
-    expect(gm.visibleQuestion, isNot(same(originalQuestion)));
-    expect(
-      gm.visibleQuestion!.expression,
-      isNot(originalQuestion.expression),
-    );
-    expect(gm.submitAnswer(originalQuestion.correctAnswer), isTrue);
-    expect(gm.ropePosition, greaterThan(0));
-    gm.dispose();
-  });
+      expect(gm.visibleQuestion, isNot(same(originalQuestion)));
+      expect(
+        gm.visibleQuestion!.expression,
+        isNot(originalQuestion.expression),
+      );
+      expect(gm.submitAnswer(originalQuestion.correctAnswer), isTrue);
+      expect(gm.ropePosition, greaterThan(0));
+      gm.dispose();
+    },
+  );
 
   test('L’IA utilise tous ses bonus et vole du temps', () async {
     final gm = GameManager(

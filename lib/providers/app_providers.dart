@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../services/storage_service.dart';
+
 class AppSettings {
   final bool musicEnabled;
   final bool sfxEnabled;
@@ -15,12 +17,11 @@ class AppSettings {
     bool? musicEnabled,
     bool? sfxEnabled,
     String? language,
-  }) =>
-      AppSettings(
-        musicEnabled: musicEnabled ?? this.musicEnabled,
-        sfxEnabled: sfxEnabled ?? this.sfxEnabled,
-        language: language ?? this.language,
-      );
+  }) => AppSettings(
+    musicEnabled: musicEnabled ?? this.musicEnabled,
+    sfxEnabled: sfxEnabled ?? this.sfxEnabled,
+    language: language ?? this.language,
+  );
 }
 
 class AppSettingsNotifier extends StateNotifier<AppSettings> {
@@ -33,16 +34,9 @@ class AppSettingsNotifier extends StateNotifier<AppSettings> {
 
 final appSettingsProvider =
     StateNotifierProvider<AppSettingsNotifier, AppSettings>(
-  (ref) => AppSettingsNotifier(),
-);
+      (ref) => AppSettingsNotifier(),
+    );
 
-final statsProvider = FutureProvider<Map<String, dynamic>>((ref) async {
-  return {
-    'gamesPlayed': 0,
-    'wins': 0,
-    'losses': 0,
-    'correctAnswers': 0,
-    'totalAnswers': 0,
-    'bestWinStreak': 0,
-  };
-});
+final statsProvider = FutureProvider.autoDispose<Map<String, dynamic>>(
+  (ref) => StorageService.getStats(),
+);

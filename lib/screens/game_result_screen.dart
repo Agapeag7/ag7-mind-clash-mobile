@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+
 import '../core/constants.dart';
 import '../widgets/game_ui.dart';
-import 'home_screen.dart';
 
 class GameResultScreen extends StatelessWidget {
   final int redWins;
@@ -88,13 +88,8 @@ class GameResultScreen extends StatelessWidget {
                         color: AppColors.blue,
                         icon: Icons.home_rounded,
                         onPressed: () {
-                          Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const HomeScreen(),
-                            ),
-                            (_) => false,
-                          );
+                          Navigator.of(context)
+                              .popUntil((route) => route.isFirst);
                         },
                       ),
                     ],

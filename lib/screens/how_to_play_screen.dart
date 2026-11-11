@@ -38,7 +38,7 @@ class HowToPlayScreen extends StatelessWidget {
             const _InstructionStep(
               number: 4,
               icon: Icons.timer_off_rounded,
-              text: 'Tu as deux tentatives. Si elles échouent, la corde avance vers l’adversaire.',
+              text: 'Tu as deux tentatives. Si le chrono s’écoule ou si elles échouent, la corde avance vers l’adversaire.',
             ),
             const _InstructionStep(
               number: 5,
@@ -163,6 +163,6 @@ class _BonusTile extends StatelessWidget {
     PowerUpType.illusion => Icons.visibility_off_rounded,
     PowerUpType.autoAnswer => Icons.auto_awesome_rounded,
     PowerUpType.extraAttempt => Icons.favorite_rounded,
-    PowerUpType.ropeFreeze => Icons.link_rounded,
+    PowerUpType.ropeFreeze => Icons.ac_unit_rounded,
   };
 }

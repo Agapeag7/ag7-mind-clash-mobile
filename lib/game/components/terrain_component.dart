@@ -25,9 +25,9 @@ class TerrainComponent extends PositionComponent {
       ).createShader(Rect.fromLTWH(0, 0, size.x, groundY));
     canvas.drawRect(Rect.fromLTWH(0, 0, size.x, groundY), sky);
 
-    _cloud(canvas, Offset(size.x * 0.2, groundY * 0.25), 38);
-    _cloud(canvas, Offset(size.x * 0.75, groundY * 0.18), 46);
-    _cloud(canvas, Offset(size.x * 0.5, groundY * 0.35), 30);
+    _cloud(canvas, Offset(size.x * 0.2, groundY * 0.25), 24);
+    _cloud(canvas, Offset(size.x * 0.75, groundY * 0.18), 28);
+    _cloud(canvas, Offset(size.x * 0.5, groundY * 0.35), 20);
 
     final ground = Paint()
       ..shader = const LinearGradient(
@@ -51,7 +51,7 @@ class TerrainComponent extends PositionComponent {
     _dashedLine(
       canvas,
       Offset(centerX, groundY - 4),
-      Offset(centerX, groundY - 60),
+      Offset(centerX, groundY - 40),
       Colors.white,
     );
     _winMarker(canvas, centerX - winLineOffset, AppColors.red);
@@ -96,7 +96,7 @@ class TerrainComponent extends PositionComponent {
       ..color = color
       ..strokeWidth = 4
       ..strokeCap = StrokeCap.round;
-    canvas.drawLine(Offset(x, groundY - 6), Offset(x, groundY - 72), paint);
-    canvas.drawCircle(Offset(x, groundY - 78), 6, Paint()..color = color);
+    canvas.drawLine(Offset(x, groundY - 4), Offset(x, groundY - 42), paint);
+    canvas.drawCircle(Offset(x, groundY - 47), 5, Paint()..color = color);
   }
 }

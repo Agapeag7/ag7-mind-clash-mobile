@@ -17,13 +17,17 @@ class TeamComponent extends PositionComponent {
     required this.color,
     required List<double> spacing,
     double charHeight = 160,
-  }) : super(position: position) {
+  }) : super(
+         position: position,
+         size: Vector2(spacing.last + charHeight * 0.62, charHeight),
+       ) {
+    final characterWidth = charHeight * 0.62;
     for (var i = 0; i < spacing.length; i++) {
       final isLeader =
           (side == TeamSide.red && i == spacing.length - 1) ||
           (side == TeamSide.blue && i == 0);
       final c = CharacterComponent(
-        position: Vector2(spacing[i], 0),
+        position: Vector2(characterWidth / 2 + spacing[i], charHeight),
         side: side,
         teamColor: color,
         isLeader: isLeader,

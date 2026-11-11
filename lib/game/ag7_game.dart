@@ -9,16 +9,18 @@ import 'components/team_component.dart';
 import 'components/terrain_component.dart';
 
 class Ag7Game extends FlameGame {
-  static final Vector2 virtualSize = Vector2(720, 405);
+  static final Vector2 virtualSize = Vector2(720, 230);
 
   late TerrainComponent terrain;
   late TeamComponent redTeam;
   late TeamComponent blueTeam;
   late RopeComponent rope;
 
-  final double groundY = 325;
+  final double groundY = 175;
   final double centerX = 360;
   final double winLineOffset = 85;
+  final double characterHeight = 82;
+  final double characterSpacing = 56;
   double pixelsPerUnit = 0;
 
   bool _ready = false;
@@ -41,30 +43,34 @@ class Ag7Game extends FlameGame {
     );
     add(terrain);
 
+    final teamWidth = characterHeight * 0.62 + characterSpacing * 2;
+    final teamTop = groundY - characterHeight;
+    const teamCenterOffset = 105.0;
+
     // Rouge : 3 personnages à gauche. Le leader est le plus à droite.
     redTeam = TeamComponent(
-      position: Vector2(centerX - 295, groundY),
+      position: Vector2(centerX - teamWidth / 2 - teamCenterOffset, teamTop),
       side: TeamSide.red,
       color: AppColors.red,
-      spacing: const [0, 100, 200],
-      charHeight: 180,
+      spacing: [0, characterSpacing, characterSpacing * 2],
+      charHeight: characterHeight,
     );
     add(redTeam);
 
-    // Bleu : leader le plus à gauche (donc à centerX + 20).
+    // Bleu : leader le plus à gauche.
     blueTeam = TeamComponent(
-      position: Vector2(centerX - 5, groundY),
+      position: Vector2(centerX - teamWidth / 2 + teamCenterOffset, teamTop),
       side: TeamSide.blue,
       color: AppColors.blue,
-      spacing: const [0, 100, 200],
-      charHeight: 180,
+      spacing: [0, characterSpacing, characterSpacing * 2],
+      charHeight: characterHeight,
     );
     add(blueTeam);
 
     rope = RopeComponent(
       ropeStartX: centerX - 120,
       ropeEndX: centerX + 120,
-      ropeY: groundY - 90,
+      ropeY: groundY - 43,
       pixelsPerUnit: pixelsPerUnit,
     );
     add(rope);

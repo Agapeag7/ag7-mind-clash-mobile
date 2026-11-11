@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:shared_preferences/shared_preferences.dart';
 
 class StorageService {
@@ -32,8 +33,12 @@ class StorageService {
     final raw = (await _p).getString(_kStats);
     if (raw == null) return _emptyStats();
     try {
-      return jsonDecode(raw) as Map<String, dynamic>;
-    } catch (_) {
+      final decoded = jsonDecode(raw);
+      if (decoded is Map<String, dynamic>) {
+        return {..._emptyStats(), ...decoded};
+      }
+      return _emptyStats();
+    } on FormatException {
       return _emptyStats();
     }
   }
@@ -42,12 +47,40 @@ class StorageService {
     await (await _p).setString(_kStats, jsonEncode(stats));
   }
 
+  static Future<void> recordGameResult({
+    required bool won,
+    required int correctAnswers,
+    required int totalAnswers,
+  }) async {
+    final stats = await getStats();
+    stats['gamesPlayed'] = _count(stats['gamesPlayed']) + 1;
+    stats['correctAnswers'] = _count(stats['correctAnswers']) + correctAnswers;
+    stats['totalAnswers'] = _count(stats['totalAnswers']) + totalAnswers;
+
+    final currentStreak = won ? _count(stats['currentWinStreak']) + 1 : 0;
+    stats['currentWinStreak'] = currentStreak;
+    if (won) {
+      stats['wins'] = _count(stats['wins']) + 1;
+      final bestStreak = _count(stats['bestWinStreak']);
+      stats['bestWinStreak'] = currentStreak > bestStreak
+          ? currentStreak
+          : bestStreak;
+    } else {
+      stats['losses'] = _count(stats['losses']) + 1;
+    }
+
+    await saveStats(stats);
+  }
+
+  static int _count(Object? value) => value is num ? value.toInt() : 0;
+
   static Map<String, dynamic> _emptyStats() => {
-        'gamesPlayed': 0,
-        'wins': 0,
-        'losses': 0,
-        'correctAnswers': 0,
-        'totalAnswers': 0,
-        'bestWinStreak': 0,
-      };
+    'gamesPlayed': 0,
+    'wins': 0,
+    'losses': 0,
+    'correctAnswers': 0,
+    'totalAnswers': 0,
+    'bestWinStreak': 0,
+    'currentWinStreak': 0,
+  };
 }

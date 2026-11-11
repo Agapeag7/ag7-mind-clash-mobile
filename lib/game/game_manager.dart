@@ -60,6 +60,11 @@ class GameManager extends ChangeNotifier {
   int _gameWinnerSide = -1;
   int get gameWinnerSide => _gameWinnerSide;
 
+  int _correctAnswers = 0;
+  int get correctAnswers => _correctAnswers;
+  int _totalAnswers = 0;
+  int get totalAnswers => _totalAnswers;
+
   // Power-up flags
   bool _redDoubleNext = false;
   bool _blueDoubleNext = false;
@@ -85,6 +90,8 @@ class GameManager extends ChangeNotifier {
   void startNewGame() {
     red.roundsWon = 0;
     blue.roundsWon = 0;
+    _correctAnswers = 0;
+    _totalAnswers = 0;
     redInventory.clear();
     blueInventory.clear();
     _round = 1;
@@ -201,10 +208,9 @@ class GameManager extends ChangeNotifier {
     _stopTimer();
     _illusionTimer?.cancel();
     _illusionPending = false;
-    _phase = GamePhase.answerValidated;
-    notifyListeners();
-    // Temps écoulé = perte d'une tentative
-    _handleWrongAnswer(timedOut: true);
+    _cancelAI();
+    _totalAnswers++;
+    _loseTurn();
   }
 
   // -------------------------------------------------------------
@@ -218,7 +224,9 @@ class GameManager extends ChangeNotifier {
     _phase = GamePhase.answerValidated;
 
     final correct = answer == _question!.correctAnswer;
+    _totalAnswers++;
     if (correct) {
+      _correctAnswers++;
       _illusionTimer?.cancel();
       _illusionPending = false;
       AudioService.correct();
@@ -279,43 +287,45 @@ class GameManager extends ChangeNotifier {
     Future.delayed(const Duration(milliseconds: 600), _switchTurn);
   }
 
-  void _handleWrongAnswer({bool timedOut = false}) {
-    final team = activeTeam;
-
+  void _handleWrongAnswer() {
     _attemptsLeft--;
     if (_attemptsLeft > 0) {
       _phase = GamePhase.activeTurn;
-      if (timedOut) {
-        _timeLeft = _turnTimeLimit;
-      }
       notifyListeners();
       _startTimer();
-      if (isVsAI && !team.isRed) {
+      if (isVsAI && !activeTeam.isRed) {
         _scheduleAIResponse();
       }
     } else {
       _illusionTimer?.cancel();
       _illusionPending = false;
-      // Perdu le tour, la corde va vers l'adversaire
-      if (team.isRed) {
-        _rope = (_rope + 1.0).clamp(
-          -GameConstants.maxRopePosition,
-          GameConstants.maxRopePosition,
-        );
-      } else {
-        _rope = (_rope - 1.0).clamp(
-          -GameConstants.maxRopePosition,
-          GameConstants.maxRopePosition,
-        );
-      }
-      if (_rope.abs() >= GameConstants.maxRopePosition) {
-        _endRound(_rope < 0 ? red : blue);
-      } else {
-        _phase = GamePhase.transition;
-        notifyListeners();
-        Future.delayed(const Duration(milliseconds: 600), _switchTurn);
-      }
+      _loseTurn();
     }
+  }
+
+  void _loseTurn() {
+    final team = activeTeam;
+    // Perdre le tour fait avancer la corde vers l'adversaire.
+    if (team.isRed) {
+      _rope = (_rope + 1.0).clamp(
+        -GameConstants.maxRopePosition,
+        GameConstants.maxRopePosition,
+      );
+    } else {
+      _rope = (_rope - 1.0).clamp(
+        -GameConstants.maxRopePosition,
+        GameConstants.maxRopePosition,
+      );
+    }
+
+    if (_rope.abs() >= GameConstants.maxRopePosition) {
+      _endRound(_rope < 0 ? red : blue);
+      return;
+    }
+
+    _phase = GamePhase.transition;
+    notifyListeners();
+    Future.delayed(const Duration(milliseconds: 600), _switchTurn);
   }
 
   void _switchTurn() {
