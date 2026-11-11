@@ -206,8 +206,8 @@ class _GameScreenState extends State<GameScreen> {
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final arenaHeight = (constraints.maxHeight * 0.34)
-                .clamp(170.0, 250.0)
+            final arenaHeight = (constraints.maxHeight * 0.39)
+                .clamp(190.0, 285.0)
                 .toDouble();
             return Column(
               children: [
@@ -493,8 +493,8 @@ class _GameScreenState extends State<GameScreen> {
                   child: Text(
                     _answerController.text.isEmpty
                         ? _isAiThinking
-                            ? 'L’IA réfléchit…'
-                            : 'Ta réponse'
+                              ? 'L’IA réfléchit…'
+                              : 'Ta réponse'
                         : _answerController.text,
                     textAlign: TextAlign.center,
                     style: TextStyle(

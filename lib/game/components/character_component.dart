@@ -1,6 +1,8 @@
 import 'dart:math' as math;
+
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
+
 import '../../core/enums.dart';
 import 'character_animations.dart';
 import 'character_enums.dart';
@@ -28,12 +30,12 @@ class CharacterComponent extends PositionComponent {
     this.isLeader = false,
     this.phaseOffset = 0,
     double height = 160,
-  })  : teamColorDark = teamColorDark ?? _darker(teamColor),
-        super(
-          position: position,
-          size: Vector2(height * 0.62, height),
-          anchor: Anchor.bottomCenter,
-        );
+  }) : teamColorDark = teamColorDark ?? _darker(teamColor),
+       super(
+         position: position,
+         size: Vector2(height * 0.62, height),
+         anchor: Anchor.bottomCenter,
+       );
 
   void play(
     AnimationState state, {
@@ -70,10 +72,14 @@ class CharacterComponent extends PositionComponent {
         ? (_stateTime % def.duration).toDouble()
         : _stateTime.clamp(0.0, def.duration).toDouble();
     final pose = def.poseAt(t);
+    final scale = size.y / 160;
 
     canvas.save();
+    canvas.translate(size.x / 2, size.y);
+    canvas.scale(scale);
+    canvas.translate(-size.x / (2 * scale), -160);
     if (side == TeamSide.blue) {
-      canvas.translate(size.x.toDouble(), 0);
+      canvas.translate(size.x / scale, 0);
       canvas.scale(-1, 1);
     }
     _drawCharacter(canvas, pose);
@@ -81,8 +87,8 @@ class CharacterComponent extends PositionComponent {
   }
 
   void _drawCharacter(Canvas canvas, CharacterPose pose) {
-    final cx = size.x / 2;
-    final feetY = size.y - 3;
+    final cx = 160 * 0.62 / 2;
+    const double feetY = 157;
 
     final shadowWidth = 30.0 + pose.verticalOffset * 0.15;
     canvas.drawOval(
@@ -107,8 +113,8 @@ class CharacterComponent extends PositionComponent {
     final shoulderY = hipY - 42;
     final headCenterY = shoulderY - 22;
 
-    _drawLeg(canvas, Offset(cx - 3, hipY), pose.legL, 40, back: true);
-    _drawLeg(canvas, Offset(cx + 3, hipY), pose.legR, 40, back: false);
+    _drawLeg(canvas, Offset(cx - 3, hipY), pose.legL, 40.0, back: true);
+    _drawLeg(canvas, Offset(cx + 3, hipY), pose.legR, 40.0, back: false);
 
     canvas.save();
     canvas.translate(cx, hipY);
@@ -140,8 +146,13 @@ class CharacterComponent extends PositionComponent {
     canvas.restore();
   }
 
-  void _drawLeg(Canvas canvas, Offset hip, double angle, double length,
-      {required bool back}) {
+  void _drawLeg(
+    Canvas canvas,
+    Offset hip,
+    double angle,
+    double length, {
+    required bool back,
+  }) {
     final foot = Offset(
       hip.dx + math.sin(angle) * length,
       hip.dy + math.cos(angle) * length,
@@ -285,15 +296,22 @@ class CharacterComponent extends PositionComponent {
     _drawMouth(canvas, Offset(c.dx, c.dy + 7), pose.mouth);
 
     if (pose.sweat > 0.01) {
-      final p = Paint()..color = const Color(0xFF64B5F6).withValues(alpha: pose.sweat);
+      final p = Paint()
+        ..color = const Color(0xFF64B5F6).withValues(alpha: pose.sweat);
       canvas.drawOval(
         Rect.fromCenter(
-            center: Offset(c.dx + 13, c.dy - 4), width: 4, height: 6),
+          center: Offset(c.dx + 13, c.dy - 4),
+          width: 4,
+          height: 6,
+        ),
         p,
       );
       canvas.drawOval(
         Rect.fromCenter(
-            center: Offset(c.dx + 16, c.dy + 4), width: 3, height: 5),
+          center: Offset(c.dx + 16, c.dy + 4),
+          width: 3,
+          height: 5,
+        ),
         p,
       );
     }
@@ -372,7 +390,10 @@ class CharacterComponent extends PositionComponent {
     switch (s) {
       case MouthState.neutral:
         canvas.drawLine(
-            Offset(pos.dx - 3, pos.dy), Offset(pos.dx + 3, pos.dy), stroke);
+          Offset(pos.dx - 3, pos.dy),
+          Offset(pos.dx + 3, pos.dy),
+          stroke,
+        );
         break;
       case MouthState.smile:
         final p = Path()

@@ -34,22 +34,20 @@ class RopeComponent extends PositionComponent {
 
   @override
   void render(Canvas canvas) {
-    final knotX = (ropeStartX + ropeEndX) / 2 +
-        ropePosition * pixelsPerUnit +
-        _osc;
+    final knotX =
+        (ropeStartX + ropeEndX) / 2 + ropePosition * pixelsPerUnit + _osc;
 
     final paint = Paint()
       ..color = const Color(0xFF8D6E63)
-      ..strokeWidth = 5
+      ..strokeWidth = 8
       ..strokeCap = StrokeCap.round;
-    canvas.drawLine(
-        Offset(ropeStartX, ropeY), Offset(ropeEndX, ropeY), paint);
+    canvas.drawLine(Offset(ropeStartX, ropeY), Offset(ropeEndX, ropeY), paint);
     canvas.drawLine(
       Offset(ropeStartX, ropeY),
       Offset(ropeEndX, ropeY),
       Paint()
         ..color = const Color(0xFF5D4037)
-        ..strokeWidth = 1.4
+        ..strokeWidth = 2
         ..style = PaintingStyle.stroke,
     );
     canvas.drawLine(
@@ -57,17 +55,17 @@ class RopeComponent extends PositionComponent {
       Offset(ropeEndX - 8, ropeY - 1.5),
       Paint()
         ..color = Colors.white.withValues(alpha: 0.35)
-        ..strokeWidth = 1.5,
+        ..strokeWidth = 2.5,
     );
 
     canvas.drawCircle(
       Offset(knotX, ropeY),
-      9,
+      12,
       Paint()..color = const Color(0xFFFDD835),
     );
     canvas.drawCircle(
       Offset(knotX, ropeY),
-      9,
+      12,
       Paint()
         ..color = const Color(0xFFC49000)
         ..style = PaintingStyle.stroke
@@ -75,7 +73,7 @@ class RopeComponent extends PositionComponent {
     );
     canvas.drawCircle(
       Offset(knotX, ropeY),
-      4,
+      5,
       Paint()..color = const Color(0xFFFFF176),
     );
   }

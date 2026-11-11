@@ -16,7 +16,7 @@ class Ag7Game extends FlameGame {
   late TeamComponent blueTeam;
   late RopeComponent rope;
 
-  final double groundY = 430;
+  final double groundY = 420;
   final double centerX = 450;
   final double winLineOffset = 120;
   double pixelsPerUnit = 0;
@@ -46,7 +46,8 @@ class Ag7Game extends FlameGame {
       position: Vector2(centerX - 340, groundY),
       side: TeamSide.red,
       color: AppColors.red,
-      spacing: const [0, 80, 160],
+      spacing: const [0, 90, 180],
+      charHeight: 220,
     );
     add(redTeam);
 
@@ -55,14 +56,15 @@ class Ag7Game extends FlameGame {
       position: Vector2(centerX + 20, groundY),
       side: TeamSide.blue,
       color: AppColors.blue,
-      spacing: const [0, 80, 160],
+      spacing: const [0, 90, 180],
+      charHeight: 220,
     );
     add(blueTeam);
 
     rope = RopeComponent(
       ropeStartX: centerX - 160,
       ropeEndX: centerX + 160,
-      ropeY: groundY - 78,
+      ropeY: groundY - 105,
       pixelsPerUnit: pixelsPerUnit,
     );
     add(rope);
