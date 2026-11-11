@@ -98,7 +98,7 @@ void main() {
     gm.dispose();
   });
 
-  test('L’IA répond automatiquement pendant le tour bleu', () async {
+  test('L’IA utilise tous ses bonus et vole du temps', () async {
     final gm = GameManager(
       config: const DifficultyConfig(
         level: 1,
@@ -112,14 +112,21 @@ void main() {
       isVsAI: true,
     );
     gm.startNewGame();
+    gm.redInventory.clear();
+    gm.blueInventory.clear();
+    for (final powerUp in PowerUp.catalog) {
+      gm.blueInventory.add(powerUp);
+    }
     gm.submitAnswer(gm.question!.correctAnswer);
 
-    await Future<void>.delayed(const Duration(milliseconds: 900));
+    await Future<void>.delayed(const Duration(milliseconds: 1400));
 
     try {
-      expect(gm.isRedTurn, isFalse);
-      expect(gm.ropePosition, 0);
-      expect(gm.phase, GamePhase.transition);
+      expect(gm.isRedTurn, isTrue);
+      expect(gm.turnTimeLimit, closeTo(gm.maxTime * 0.7, 0.001));
+      expect(gm.phase, GamePhase.activeTurn);
+      gm.submitAnswer(gm.question!.correctAnswer);
+      expect(gm.ropePosition, 1);
     } finally {
       gm.dispose();
     }

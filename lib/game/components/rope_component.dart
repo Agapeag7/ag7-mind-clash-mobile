@@ -19,7 +19,7 @@ class RopeComponent extends PositionComponent {
   }) : super(priority: 50);
 
   void setPosition(double pos) {
-    final targetPosition = pos.clamp(-5.0, 5.0);
+    final targetPosition = pos.clamp(-5.0, 5.0).toDouble();
     final delta = targetPosition - ropePosition;
     ropePosition = targetPosition;
     _oscSpeed = 8.0 * delta.sign;
@@ -34,6 +34,9 @@ class RopeComponent extends PositionComponent {
 
   @override
   void render(Canvas canvas) {
+    final movement = ropePosition * pixelsPerUnit * 0.75;
+    final currentStartX = ropeStartX + (movement > 0 ? movement : 0.0);
+    final currentEndX = ropeEndX + (movement < 0 ? movement : 0.0);
     final knotX =
         (ropeStartX + ropeEndX) / 2 + ropePosition * pixelsPerUnit + _osc;
 
@@ -41,18 +44,22 @@ class RopeComponent extends PositionComponent {
       ..color = const Color(0xFF8D6E63)
       ..strokeWidth = 8
       ..strokeCap = StrokeCap.round;
-    canvas.drawLine(Offset(ropeStartX, ropeY), Offset(ropeEndX, ropeY), paint);
     canvas.drawLine(
-      Offset(ropeStartX, ropeY),
-      Offset(ropeEndX, ropeY),
+      Offset(currentStartX, ropeY),
+      Offset(currentEndX, ropeY),
+      paint,
+    );
+    canvas.drawLine(
+      Offset(currentStartX, ropeY),
+      Offset(currentEndX, ropeY),
       Paint()
         ..color = const Color(0xFF5D4037)
         ..strokeWidth = 2
         ..style = PaintingStyle.stroke,
     );
     canvas.drawLine(
-      Offset(ropeStartX + 8, ropeY - 1.5),
-      Offset(ropeEndX - 8, ropeY - 1.5),
+      Offset(currentStartX + 8, ropeY - 1.5),
+      Offset(currentEndX - 8, ropeY - 1.5),
       Paint()
         ..color = Colors.white.withValues(alpha: 0.35)
         ..strokeWidth = 2.5,

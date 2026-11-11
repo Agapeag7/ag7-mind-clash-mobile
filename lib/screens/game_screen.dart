@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../core/constants.dart';
 import '../core/difficulty.dart';
@@ -38,6 +41,11 @@ class _GameScreenState extends State<GameScreen> {
   @override
   void initState() {
     super.initState();
+    unawaited(
+      SystemChrome.setPreferredOrientations(const [
+        DeviceOrientation.portraitUp,
+      ]),
+    );
     _game = Ag7Game();
     _gm = GameManager(
       config: DifficultyConfig.byLevel(widget.difficulty),
@@ -49,6 +57,13 @@ class _GameScreenState extends State<GameScreen> {
 
   @override
   void dispose() {
+    unawaited(
+      SystemChrome.setPreferredOrientations(const [
+        DeviceOrientation.portraitUp,
+        DeviceOrientation.landscapeLeft,
+        DeviceOrientation.landscapeRight,
+      ]),
+    );
     _gm.removeListener(_onManagerChanged);
     _gm.dispose();
     _answerController.dispose();
@@ -206,8 +221,8 @@ class _GameScreenState extends State<GameScreen> {
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final arenaHeight = (constraints.maxHeight * 0.39)
-                .clamp(190.0, 285.0)
+            final arenaHeight = (constraints.maxHeight * 0.21)
+              .clamp(110.0, 170.0)
                 .toDouble();
             return Column(
               children: [
@@ -240,36 +255,40 @@ class _GameScreenState extends State<GameScreen> {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(19),
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Positioned.fill(child: GameWidget(game: game)),
-            Positioned(
-              top: 10,
-              left: 10,
-              child: _teamMarker('ROUGE', AppColors.red),
-            ),
-            Positioned(
-              top: 10,
-              right: 54,
-              child: _teamMarker(
-                _gm.isVsAI ? 'BLEU · IA' : 'BLEU',
-                AppColors.blue,
-              ),
-            ),
-            Positioned(
-              top: 2,
-              right: 2,
-              child: IconButton(
-                icon: const Icon(
-                  Icons.pause_circle_filled,
-                  size: 36,
-                  color: AppColors.navy,
+        child: Center(
+          child: AspectRatio(
+            aspectRatio: 16 / 9,
+            child: Stack(
+              children: [
+                Positioned.fill(child: GameWidget(game: game)),
+                Positioned(
+                  top: 10,
+                  left: 10,
+                  child: _teamMarker('ROUGE', AppColors.red),
                 ),
-                onPressed: _onPause,
-              ),
+                Positioned(
+                  top: 10,
+                  right: 54,
+                  child: _teamMarker(
+                    _gm.isVsAI ? 'BLEU · IA' : 'BLEU',
+                    AppColors.blue,
+                  ),
+                ),
+                Positioned(
+                  top: 2,
+                  right: 2,
+                  child: IconButton(
+                    icon: const Icon(
+                      Icons.pause_circle_filled,
+                      size: 36,
+                      color: AppColors.navy,
+                    ),
+                    onPressed: _onPause,
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -369,15 +388,25 @@ class _GameScreenState extends State<GameScreen> {
     final inventory = _gm.isRedTurn ? _gm.redInventory : _gm.blueInventory;
     return LayoutBuilder(
       builder: (context, constraints) {
-        final compact = constraints.maxHeight < 360;
-        final keyHeight = compact ? 34.0 : 40.0;
+        final compact = constraints.maxHeight < 420;
         final spacing = compact ? 4.0 : 8.0;
+        final reservedHeight = inventory.isEmpty ? 190.0 : 228.0;
+        final keyHeight = compact
+            ? ((constraints.maxHeight - reservedHeight) / 4)
+                  .clamp(24.0, 44.0)
+                  .toDouble()
+            : 40.0;
         return Container(
-          padding: EdgeInsets.fromLTRB(12, compact ? 7 : 10, 12, 8),
-          decoration: const BoxDecoration(
+          padding: EdgeInsets.fromLTRB(
+            12,
+            compact ? 5 : 10,
+            12,
+            compact ? 5 : 8,
+          ),
+          decoration: BoxDecoration(
             color: Colors.white,
-            border: Border(top: BorderSide(color: AppColors.panelBorder)),
-            boxShadow: [
+            border: const Border(top: BorderSide(color: AppColors.panelBorder)),
+            boxShadow: const [
               BoxShadow(
                 color: Color(0x140D2444),
                 blurRadius: 10,
@@ -385,180 +414,183 @@ class _GameScreenState extends State<GameScreen> {
               ),
             ],
           ),
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.calculate_rounded,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    Icons.calculate_rounded,
+                    color: AppColors.navy,
+                    size: compact ? 16 : 18,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    'QUESTION & CALCUL',
+                    style: TextStyle(
                       color: AppColors.navy,
-                      size: 18,
+                      fontSize: compact ? 11 : 12,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0.6,
                     ),
-                    const SizedBox(width: 6),
-                    const Text(
-                      'QUESTION & CALCUL',
-                      style: TextStyle(
-                        color: AppColors.navy,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 0.6,
-                      ),
+                  ),
+                  const Spacer(),
+                  Text(
+                    _isAiThinking ? 'TOUR DE L’IA' : 'À TON TOUR',
+                    style: TextStyle(
+                      color: _isAiThinking ? AppColors.blue : activeColor,
+                      fontSize: compact ? 9 : 10,
+                      fontWeight: FontWeight.w800,
                     ),
-                    const Spacer(),
-                    Text(
-                      _isAiThinking ? 'TOUR DE L’IA' : 'À TON TOUR',
-                      style: TextStyle(
-                        color: _isAiThinking ? AppColors.blue : activeColor,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w800,
-                      ),
+                  ),
+                ],
+              ),
+              SizedBox(height: spacing),
+              Row(
+                children: [
+                  Expanded(
+                    child: LinearProgressIndicator(
+                      value: _gm.turnTimeLimit == 0
+                          ? 0
+                          : (_gm.timeLeft / _gm.turnTimeLimit).clamp(0.0, 1.0),
+                      minHeight: compact ? 6 : 8,
+                      backgroundColor: Colors.black12,
+                      valueColor: AlwaysStoppedAnimation(activeColor),
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    '${_gm.timeLeft.toStringAsFixed(1)}s',
+                    style: const TextStyle(
+                      color: AppColors.navy,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text('♥ ${_gm.attemptsLeft}'),
+                ],
+              ),
+              if (!inventory.isEmpty) ...[
                 SizedBox(height: spacing),
-                Row(
-                  children: [
-                    Expanded(
-                      child: LinearProgressIndicator(
-                        value: _gm.turnTimeLimit == 0
-                            ? 0
-                            : (_gm.timeLeft / _gm.turnTimeLimit).clamp(
-                                0.0,
-                                1.0,
-                              ),
-                        minHeight: 8,
-                        backgroundColor: Colors.black12,
-                        valueColor: AlwaysStoppedAnimation(activeColor),
-                      ),
+                SizedBox(
+                  height: compact ? 30 : 48,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: inventory.items
+                          .map(
+                            (powerUp) =>
+                                _buildPowerUpIcon(powerUp, compact: compact),
+                          )
+                          .toList(),
                     ),
-                    const SizedBox(width: 8),
-                    Text(
-                      '${_gm.timeLeft.toStringAsFixed(1)}s',
-                      style: const TextStyle(
-                        color: AppColors.navy,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text('♥ ${_gm.attemptsLeft}'),
-                  ],
+                  ),
                 ),
-                if (!inventory.isEmpty) ...[
-                  SizedBox(height: spacing),
+              ],
+              SizedBox(height: spacing),
+              Container(
+                width: double.infinity,
+                padding: EdgeInsets.symmetric(vertical: compact ? 4 : 7),
+                decoration: BoxDecoration(
+                  color: AppColors.bgTop,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: AppColors.panelBorder),
+                ),
+                child: Text(
+                  q?.expression ?? '—',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: AppColors.navy,
+                    fontSize: compact ? 23 : 32,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+              SizedBox(height: spacing),
+              Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: compact ? 6 : 10,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.bgTop,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: activeColor, width: 2),
+                      ),
+                      child: Text(
+                        _answerController.text.isEmpty
+                            ? _isAiThinking
+                                  ? 'L’IA réfléchit…'
+                                  : 'Ta réponse'
+                            : _answerController.text,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: _canPlayerAnswer
+                              ? AppColors.navy
+                              : AppColors.blueDark,
+                          fontSize: compact ? 18 : 24,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
                   SizedBox(
-                    height: 48,
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: inventory.items
-                            .map((powerUp) => _buildPowerUpIcon(powerUp))
-                            .toList(),
+                    width: compact ? 76 : 96,
+                    height: compact ? 38 : 48,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: activeColor,
+                        foregroundColor: Colors.white,
+                        padding: EdgeInsets.zero,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      onPressed: _canPlayerAnswer ? _onSubmit : null,
+                      child: Text(
+                        compact ? 'OK' : 'VALIDER',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w900,
+                        ),
                       ),
                     ),
                   ),
                 ],
-                SizedBox(height: spacing),
-                Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.symmetric(vertical: compact ? 4 : 7),
-                  decoration: BoxDecoration(
-                    color: AppColors.bgTop,
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: AppColors.panelBorder),
-                  ),
-                  child: Text(
-                    q?.expression ?? '—',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: AppColors.navy,
-                      fontSize: compact ? 27 : 32,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
+              ),
+              SizedBox(height: spacing),
+              Container(
+                padding: EdgeInsets.all(compact ? 3 : 4),
+                decoration: BoxDecoration(
+                  color: AppColors.bgBottom.withValues(alpha: 0.55),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: AppColors.panelBorder),
                 ),
-                SizedBox(height: spacing),
-                Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: compact ? 6 : 10,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.bgTop,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: activeColor, width: 2),
-                  ),
-                  child: Text(
-                    _answerController.text.isEmpty
-                        ? _isAiThinking
-                              ? 'L’IA réfléchit…'
-                              : 'Ta réponse'
-                        : _answerController.text,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: _canPlayerAnswer
-                          ? AppColors.navy
-                          : AppColors.blueDark,
-                      fontSize: compact ? 20 : 24,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-                SizedBox(height: spacing),
-                Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: AppColors.bgBottom.withValues(alpha: 0.55),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: AppColors.panelBorder),
-                  ),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 300),
                   child: _buildKeypad(activeColor, keyHeight),
                 ),
-                SizedBox(height: spacing),
-                Row(
-                  children: [
-                    Expanded(
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: activeColor,
-                          foregroundColor: Colors.white,
-                          minimumSize: Size.fromHeight(keyHeight + 4),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
-                            side: BorderSide(
-                              color: activeColor.withValues(alpha: 0.7),
-                              width: 2,
-                            ),
-                          ),
-                          elevation: 4,
-                        ),
-                        onPressed: _canPlayerAnswer ? _onSubmit : null,
-                        child: const Text(
-                          'VALIDER',
-                          style: TextStyle(fontWeight: FontWeight.w900),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         );
       },
     );
   }
 
-  Widget _buildPowerUpIcon(PowerUp powerUp) {
+  Widget _buildPowerUpIcon(PowerUp powerUp, {bool compact = false}) {
     final icon = switch (powerUp.type) {
       PowerUpType.doublePoints => Icons.bolt_rounded,
       PowerUpType.timeTheft => Icons.timer_rounded,
       PowerUpType.illusion => Icons.visibility_off_rounded,
       PowerUpType.autoAnswer => Icons.auto_awesome_rounded,
       PowerUpType.extraAttempt => Icons.favorite_rounded,
-      PowerUpType.ropeFreeze => Icons.link_rounded,
+      PowerUpType.ropeFreeze => Icons.ac_unit_rounded,
     };
     final enabled = _canPlayerAnswer;
     return Padding(
@@ -569,15 +601,15 @@ class _GameScreenState extends State<GameScreen> {
           button: true,
           label: 'Utiliser le bonus ${powerUp.name}',
           child: SizedBox(
-            width: 48,
-            height: 48,
+            width: compact ? 34 : 48,
+            height: compact ? 34 : 48,
             child: InkWell(
               onTap: enabled ? () => _gm.usePowerUp(powerUp) : null,
               borderRadius: BorderRadius.circular(12),
               child: Center(
                 child: Container(
-                  width: 38,
-                  height: 38,
+                  width: compact ? 28 : 38,
+                  height: compact ? 28 : 38,
                   decoration: BoxDecoration(
                     color: enabled
                         ? AppColors.yellow.withValues(alpha: 0.28)
@@ -599,7 +631,7 @@ class _GameScreenState extends State<GameScreen> {
                   ),
                   child: Icon(
                     icon,
-                    size: 20,
+                    size: compact ? 16 : 20,
                     color: enabled ? AppColors.navy : AppColors.muted,
                   ),
                 ),
@@ -621,9 +653,11 @@ class _GameScreenState extends State<GameScreen> {
     return Column(
       children: rows.map((r) {
         return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: r.map((label) {
             final isAction = label == 'C' || label == '⌫';
-            return Expanded(
+            return SizedBox(
+              width: keyHeight <= 30 ? 78 : 92,
               child: Padding(
                 padding: const EdgeInsets.all(3),
                 child: SizedBox(

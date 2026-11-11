@@ -2,6 +2,8 @@
 
 Jeu mobile Android de tir à la corde mathématique, avec personnages cartoon 2D
 dessinés en code et illustrations PNG transparentes pour les modes et résultats.
+Les manches se jouent en portrait dans une arène 16:9, avec les commandes visibles
+à l’écran sans défilement.
 
 ## Lancer
 

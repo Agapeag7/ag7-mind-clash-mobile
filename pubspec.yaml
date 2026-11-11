@@ -71,6 +71,11 @@ flutter:
     - assets/icon/icone_ag7mindclash.png
     - assets/audio/
     - assets/images/
+    - assets/images/backgrounds/
+    - assets/images/characters/
+    - assets/images/characters/blue/
+    - assets/images/characters/red/
+    - assets/images/characters/ia/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

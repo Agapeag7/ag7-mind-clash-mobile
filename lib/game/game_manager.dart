@@ -243,14 +243,13 @@ class GameManager extends ChangeNotifier {
       _blueDoubleNext = false;
     }
 
-    // Gel de corde : l'adversaire est protégé
-    final opponentFrozen = team.isRed ? _blueRopeFrozen : _redRopeFrozen;
-    if (opponentFrozen) {
-      // On consomme le gel sans bouger la corde
+    // Gel de corde : l'équipe protégée ne peut pas déplacer la corde.
+    final teamFrozen = team.isRed ? _redRopeFrozen : _blueRopeFrozen;
+    if (teamFrozen) {
       if (team.isRed) {
-        _blueRopeFrozen = false;
-      } else {
         _redRopeFrozen = false;
+      } else {
+        _blueRopeFrozen = false;
       }
     } else {
       final pull = team.isRed ? -delta : delta;
@@ -349,7 +348,21 @@ class GameManager extends ChangeNotifier {
         !identical(_question, question)) {
       return;
     }
-    submitAnswer(answer);
+    final bonuses = List<PowerUp>.of(blueInventory.items);
+    bonuses.sort((first, second) {
+      final firstIsAutoAnswer = first.type == PowerUpType.autoAnswer;
+      final secondIsAutoAnswer = second.type == PowerUpType.autoAnswer;
+      return firstIsAutoAnswer == secondIsAutoAnswer
+          ? 0
+          : firstIsAutoAnswer
+          ? 1
+          : -1;
+    });
+    for (final bonus in bonuses) {
+      if (_phase != GamePhase.activeTurn || activeTeam.isRed) return;
+      usePowerUp(bonus);
+    }
+    if (_phase == GamePhase.activeTurn) submitAnswer(answer);
   }
 
   void _cancelAI() {

@@ -9,16 +9,16 @@ import 'components/team_component.dart';
 import 'components/terrain_component.dart';
 
 class Ag7Game extends FlameGame {
-  static final Vector2 virtualSize = Vector2(900, 540);
+  static final Vector2 virtualSize = Vector2(720, 405);
 
   late TerrainComponent terrain;
   late TeamComponent redTeam;
   late TeamComponent blueTeam;
   late RopeComponent rope;
 
-  final double groundY = 420;
-  final double centerX = 450;
-  final double winLineOffset = 120;
+  final double groundY = 325;
+  final double centerX = 360;
+  final double winLineOffset = 85;
   double pixelsPerUnit = 0;
 
   bool _ready = false;
@@ -43,28 +43,28 @@ class Ag7Game extends FlameGame {
 
     // Rouge : 3 personnages à gauche. Le leader est le plus à droite.
     redTeam = TeamComponent(
-      position: Vector2(centerX - 340, groundY),
+      position: Vector2(centerX - 295, groundY),
       side: TeamSide.red,
       color: AppColors.red,
-      spacing: const [0, 90, 180],
-      charHeight: 220,
+      spacing: const [0, 100, 200],
+      charHeight: 180,
     );
     add(redTeam);
 
     // Bleu : leader le plus à gauche (donc à centerX + 20).
     blueTeam = TeamComponent(
-      position: Vector2(centerX + 20, groundY),
+      position: Vector2(centerX - 5, groundY),
       side: TeamSide.blue,
       color: AppColors.blue,
-      spacing: const [0, 90, 180],
-      charHeight: 220,
+      spacing: const [0, 100, 200],
+      charHeight: 180,
     );
     add(blueTeam);
 
     rope = RopeComponent(
-      ropeStartX: centerX - 160,
-      ropeEndX: centerX + 160,
-      ropeY: groundY - 105,
+      ropeStartX: centerX - 120,
+      ropeEndX: centerX + 120,
+      ropeY: groundY - 90,
       pixelsPerUnit: pixelsPerUnit,
     );
     add(rope);
@@ -88,7 +88,10 @@ class Ag7Game extends FlameGame {
     AnimationState? blueReaction,
   }) {
     if (!_ready) return;
-    rope.setPosition(pos);
+    final position = pos.clamp(-5.0, 5.0).toDouble();
+    rope.setPosition(position);
+    redTeam.setRopePosition(position, pixelsPerUnit);
+    blueTeam.setRopePosition(position, pixelsPerUnit);
     final pullingSide = _activeSide ?? TeamSide.red;
     final pullingAnimation = pullingSide == TeamSide.red
         ? AnimationState.pull
