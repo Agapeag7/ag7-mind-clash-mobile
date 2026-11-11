@@ -17,7 +17,7 @@ class PauseScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.navy.withValues(alpha: 0.72),
+      backgroundColor: Colors.transparent,
       body: SafeArea(
         child: Center(
           child: GamePanel(

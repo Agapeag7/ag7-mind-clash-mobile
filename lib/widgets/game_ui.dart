@@ -161,19 +161,70 @@ class GameActionButton extends StatelessWidget {
 
 class GameModeArtwork extends StatelessWidget {
   final double height;
+  final bool againstAi;
 
-  const GameModeArtwork({super.key, this.height = 150});
+  const GameModeArtwork({super.key, this.height = 150, this.againstAi = false});
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(14),
-      child: Image.asset(
-        'assets/icon/icone_ag7mindclash.png',
-        width: height,
-        height: height,
-        fit: BoxFit.cover,
+    return Container(
+      height: height,
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      decoration: BoxDecoration(
+        color: AppColors.bgTop,
+        borderRadius: BorderRadius.circular(14),
       ),
+      child: Row(
+        children: [
+          _ModeAvatar(color: AppColors.red, icon: Icons.face_rounded),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.sports_kabaddi_rounded,
+                  color: AppColors.navy.withValues(alpha: 0.75),
+                  size: 28,
+                ),
+                Text(
+                  'VS',
+                  style: TextStyle(
+                    color: AppColors.navy.withValues(alpha: 0.7),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          _ModeAvatar(
+            color: AppColors.blue,
+            icon: againstAi ? Icons.smart_toy_rounded : Icons.face_rounded,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ModeAvatar extends StatelessWidget {
+  final Color color;
+  final IconData icon;
+
+  const _ModeAvatar({required this.color, required this.icon});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 66,
+      height: 74,
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.14),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+      ),
+      child: Icon(icon, color: color, size: 48),
     );
   }
 }

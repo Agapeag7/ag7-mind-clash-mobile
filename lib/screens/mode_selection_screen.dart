@@ -29,6 +29,7 @@ class ModeSelectionScreen extends StatelessWidget {
                     _ModeCard(
                       title: 'JOUEUR VS JOUEUR',
                       subtitle: 'Défie un ami sur le même appareil',
+                      againstAi: false,
                       onTap: () =>
                           _goToDifficulty(context, GameMode.playerVsPlayer),
                     ),
@@ -36,6 +37,7 @@ class ModeSelectionScreen extends StatelessWidget {
                     _ModeCard(
                       title: 'JOUEUR VS IA',
                       subtitle: 'Affronte l’équipe bleue contrôlée par l’IA',
+                      againstAi: true,
                       onTap: () =>
                           _goToDifficulty(context, GameMode.playerVsAI),
                     ),
@@ -60,11 +62,13 @@ class ModeSelectionScreen extends StatelessWidget {
 class _ModeCard extends StatelessWidget {
   final String title;
   final String subtitle;
+  final bool againstAi;
   final VoidCallback onTap;
 
   const _ModeCard({
     required this.title,
     required this.subtitle,
+    required this.againstAi,
     required this.onTap,
   });
 
@@ -79,7 +83,7 @@ class _ModeCard extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(14, 14, 14, 16),
           child: Column(
             children: [
-              GameModeArtwork(height: 128),
+              GameModeArtwork(height: 128, againstAi: againstAi),
               const SizedBox(height: 8),
               Text(
                 title,

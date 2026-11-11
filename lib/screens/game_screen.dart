@@ -166,8 +166,11 @@ class _GameScreenState extends State<GameScreen> {
     _gm.pause();
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (_) => PauseScreen(
+      PageRouteBuilder<void>(
+        opaque: false,
+        barrierDismissible: false,
+        barrierColor: AppColors.navy.withValues(alpha: 0.72),
+        pageBuilder: (context, animation, secondaryAnimation) => PauseScreen(
           onResume: () {
             Navigator.pop(context);
             _gm.resume();
@@ -184,6 +187,9 @@ class _GameScreenState extends State<GameScreen> {
             Navigator.pop(context);
           },
         ),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(opacity: animation, child: child);
+        },
       ),
     );
   }

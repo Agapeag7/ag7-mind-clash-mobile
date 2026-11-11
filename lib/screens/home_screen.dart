@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../core/constants.dart';
 import '../widgets/game_ui.dart';
+import 'how_to_play_screen.dart';
 import 'mode_selection_screen.dart';
 import 'settings_screen.dart';
 import 'statistics_screen.dart';
@@ -83,6 +84,19 @@ class HomeScreen extends StatelessWidget {
                         context,
                         MaterialPageRoute(
                           builder: (_) => const SettingsScreen(),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    GameActionButton(
+                      label: 'COMMENT JOUER',
+                      color: Colors.white,
+                      foregroundColor: AppColors.navy,
+                      icon: Icons.help_outline_rounded,
+                      onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const HowToPlayScreen(),
                         ),
                       ),
                     ),
