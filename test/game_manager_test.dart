@@ -44,6 +44,20 @@ void main() {
     gm.dispose();
   });
 
+  test('Chaque équipe ne peut pas conserver plus de six bonus', () {
+    final gm = GameManager(config: DifficultyConfig.byLevel(1), isVsAI: false);
+    final bonus = PowerUp.catalog.first;
+
+    for (var i = 0; i < 7; i++) {
+      gm.redInventory.add(bonus);
+      gm.blueInventory.add(bonus);
+    }
+
+    expect(gm.redInventory.length, 6);
+    expect(gm.blueInventory.length, 6);
+    gm.dispose();
+  });
+
   test('Deux mauvaises réponses passent le tour', () {
     final gm = GameManager(config: DifficultyConfig.byLevel(1), isVsAI: false);
     gm.startNewGame();

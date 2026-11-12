@@ -1,13 +1,19 @@
 import 'power_up.dart';
 
 class Inventory {
+  static const int maxCapacity = 6;
+
   final List<PowerUp> _items = [];
 
   List<PowerUp> get items => List.unmodifiable(_items);
   bool get isEmpty => _items.isEmpty;
   int get length => _items.length;
 
-  void add(PowerUp p) => _items.add(p);
+  bool add(PowerUp p) {
+    if (_items.length >= maxCapacity) return false;
+    _items.add(p);
+    return true;
+  }
 
   bool remove(PowerUp p) => _items.remove(p);
 
