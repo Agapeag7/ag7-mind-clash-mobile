@@ -6,13 +6,14 @@ import 'character_component.dart';
 
 class TeamComponent extends PositionComponent {
   static const double _spacingScale = 1;
-  static const double _backRowOffset = 0.08;
+  static const double _maxPullBackScale = 0.22;
 
   final TeamSide side;
   final List<CharacterComponent> members = [];
   final Color color;
   late double _homeX = position.x;
   late double _targetX = position.x;
+  double _pullBackOffset = 0;
 
   TeamComponent({
     required Vector2 position,
@@ -23,6 +24,7 @@ class TeamComponent extends PositionComponent {
   }) : super(
          position: position,
          size: Vector2(spacing.last + charHeight * 0.62, charHeight),
+         priority: 60,
        ) {
     for (var i = 0; i < spacing.length; i++) {
       final isLeader =
@@ -51,6 +53,7 @@ class TeamComponent extends PositionComponent {
     this.position.setFrom(position);
     _homeX = position.x;
     _targetX = position.x;
+    _pullBackOffset = 0;
     size.setValues(spacing + charHeight * 0.62, charHeight);
     _layoutMembers(
       List<double>.generate(members.length, (index) => index * spacing),
@@ -70,8 +73,7 @@ class TeamComponent extends PositionComponent {
           horizontalOffset +
               characterWidth / 2 +
               spacing[i] * _spacingScale,
-          characterHeight -
-              (members[i].isLeader ? 0 : characterHeight * _backRowOffset),
+          characterHeight,
         )
         ..size.setValues(characterWidth, characterHeight);
     }
@@ -79,7 +81,7 @@ class TeamComponent extends PositionComponent {
 
   void _setMemberDepthOrder() {
     for (final member in members) {
-      member.priority = member.isLeader ? 1 : 0;
+      member.priority = 0;
     }
   }
 
@@ -94,12 +96,13 @@ class TeamComponent extends PositionComponent {
     }
   }
 
-  void setRopePosition(double ropePosition, double pixelsPerUnit) {
-    final movement = ropePosition * pixelsPerUnit * 0.75;
-    final teamMovement = side == TeamSide.red
-        ? (movement > 0 ? movement : 0.0)
-        : (movement < 0 ? movement : 0.0);
-    _targetX = _homeX + teamMovement;
+  void pullBack(double distance) {
+    final direction = side == TeamSide.red ? -1.0 : 1.0;
+    final maxPullBack = size.y * _maxPullBackScale;
+    _pullBackOffset = (_pullBackOffset + distance * direction)
+        .clamp(-maxPullBack, maxPullBack)
+        .toDouble();
+    _targetX = _homeX + _pullBackOffset;
   }
 
   void playTeam(
@@ -113,6 +116,7 @@ class TeamComponent extends PositionComponent {
   }
 
   void resetTeam() {
+    _pullBackOffset = 0;
     _targetX = _homeX;
     position.x = _homeX;
     for (final m in members) {
