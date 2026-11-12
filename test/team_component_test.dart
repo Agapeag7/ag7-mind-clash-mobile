@@ -1,5 +1,6 @@
 import 'package:flame/components.dart';
 import 'package:ag7_mind_clash/core/enums.dart';
+import 'package:ag7_mind_clash/game/components/rope_component.dart';
 import 'package:ag7_mind_clash/game/components/team_component.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -19,12 +20,18 @@ void main() {
         );
         final leader = team.members.singleWhere((member) => member.isLeader);
         final other = team.members.singleWhere((member) => !member.isLeader);
+        final rope = RopeComponent(
+          ropeStartX: 0,
+          ropeEndX: 100,
+          ropeY: 50,
+          pixelsPerUnit: 1,
+        );
 
         expect((leader.position.x - other.position.x).abs(), characterSpacing);
         expect(leader.position.y, characterHeight);
         expect(other.position.y, leader.position.y);
         expect(leader.priority, other.priority);
-        expect(team.priority, greaterThan(50));
+        expect(rope.priority, greaterThan(team.priority));
       });
 
       test('$side moves back smoothly when pulling', () {

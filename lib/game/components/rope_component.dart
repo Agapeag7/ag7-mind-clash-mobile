@@ -19,7 +19,7 @@ class RopeComponent extends PositionComponent {
     required this.ropeEndX,
     required this.ropeY,
     required this.pixelsPerUnit,
-  }) : super(priority: 50);
+  }) : super(priority: 70);
 
   void layout({
     required double ropeStartX,
