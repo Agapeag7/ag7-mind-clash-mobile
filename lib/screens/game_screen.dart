@@ -240,7 +240,7 @@ class _GameScreenState extends State<GameScreen> {
     );
   }
 
-  Widget _buildArena() {
+  Widget _buildArena({required double height}) {
     final game = _game;
     return Container(
       decoration: BoxDecoration(
@@ -256,8 +256,9 @@ class _GameScreenState extends State<GameScreen> {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(11),
-        child: AspectRatio(
-          aspectRatio: Ag7Game.virtualSize.x / Ag7Game.virtualSize.y,
+        child: SizedBox(
+          width: double.infinity,
+          height: height,
           child: Stack(
             children: [
               Positioned.fill(child: GameWidget(game: game)),
@@ -387,7 +388,7 @@ class _GameScreenState extends State<GameScreen> {
     final inventory = _gm.isRedTurn ? _gm.redInventory : _gm.blueInventory;
     return LayoutBuilder(
       builder: (context, constraints) {
-        final compact = constraints.maxHeight < 420;
+        final compact = constraints.maxHeight < 560;
         final spacing = compact ? 4.0 : 8.0;
         const reservedHeight = 286.0;
         final keyHeight = compact
@@ -396,12 +397,7 @@ class _GameScreenState extends State<GameScreen> {
                   .toDouble()
             : 40.0;
         return Container(
-          padding: EdgeInsets.fromLTRB(
-            12,
-            compact ? 5 : 10,
-            12,
-            compact ? 5 : 8,
-          ),
+          padding: EdgeInsets.fromLTRB(12, compact ? 5 : 10, 12, 10),
           decoration: BoxDecoration(
             color: Colors.white,
             border: const Border(top: BorderSide(color: AppColors.panelBorder)),
@@ -414,7 +410,7 @@ class _GameScreenState extends State<GameScreen> {
             ],
           ),
           child: Column(
-            mainAxisSize: MainAxisSize.min,
+            mainAxisSize: MainAxisSize.max,
             children: [
               Row(
                 children: [
@@ -445,10 +441,8 @@ class _GameScreenState extends State<GameScreen> {
                 ],
               ),
               SizedBox(height: compact ? 3 : 6),
-              SizedBox(
-                height: compact ? 76 : 90,
-                child: Center(child: _buildArena()),
-              ),
+              _buildArena(height: compact ? 64 : 80),
+              const Spacer(),
               SizedBox(height: spacing),
               Row(
                 children: [
@@ -476,6 +470,7 @@ class _GameScreenState extends State<GameScreen> {
               ),
               SizedBox(height: spacing),
               Container(
+                width: double.infinity,
                 height: compact ? 30 : 48,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
@@ -584,16 +579,14 @@ class _GameScreenState extends State<GameScreen> {
               ),
               SizedBox(height: spacing),
               Container(
+                width: double.infinity,
                 padding: EdgeInsets.all(compact ? 3 : 4),
                 decoration: BoxDecoration(
                   color: AppColors.bgBottom.withValues(alpha: 0.55),
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(color: AppColors.panelBorder),
                 ),
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 300),
-                  child: _buildKeypad(activeColor, keyHeight),
-                ),
+                child: _buildKeypad(activeColor, keyHeight),
               ),
             ],
           ),
@@ -672,11 +665,9 @@ class _GameScreenState extends State<GameScreen> {
     return Column(
       children: rows.map((r) {
         return Row(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: r.map((label) {
             final isAction = label == 'C' || label == '⌫';
-            return SizedBox(
-              width: keyHeight <= 30 ? 78 : 92,
+            return Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(3),
                 child: SizedBox(

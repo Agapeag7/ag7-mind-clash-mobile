@@ -20,7 +20,7 @@ class Ag7Game extends FlameGame {
   final double centerX = 360;
   final double winLineOffset = 85;
   final double characterHeight = 82;
-  final double characterSpacing = 56;
+  final double characterSpacing = 65;
   double pixelsPerUnit = 0;
 
   bool _ready = false;
@@ -45,7 +45,7 @@ class Ag7Game extends FlameGame {
 
     final teamWidth = characterHeight * 0.62 + characterSpacing * 2;
     final teamTop = groundY - characterHeight;
-    const teamCenterOffset = 105.0;
+    const teamCenterOffset = 158.0;
 
     // Rouge : 3 personnages à gauche. Le leader est le plus à droite.
     redTeam = TeamComponent(

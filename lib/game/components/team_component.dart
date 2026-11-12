@@ -2,9 +2,12 @@ import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/enums.dart';
+import 'arena_scale.dart';
 import 'character_component.dart';
 
 class TeamComponent extends PositionComponent {
+  static const double _spacingScale = 0.7;
+
   final TeamSide side;
   final List<CharacterComponent> members = [];
   final Color color;
@@ -18,21 +21,32 @@ class TeamComponent extends PositionComponent {
     required List<double> spacing,
     double charHeight = 160,
   }) : super(
-         position: position,
-         size: Vector2(spacing.last + charHeight * 0.62, charHeight),
+         position: Vector2(position.x, position.y * arenaVerticalScale),
+         size: Vector2(
+           spacing.last + charHeight * 0.62,
+           charHeight * arenaVerticalScale,
+         ),
        ) {
-    final characterWidth = charHeight * 0.62;
+    final characterHeight = charHeight * arenaVerticalScale;
+    final characterWidth = characterHeight * 0.62;
+    final scaledSpacingEnd = spacing.last * _spacingScale;
+    final horizontalOffset =
+        (spacing.last + charHeight * 0.62 - characterWidth - scaledSpacingEnd) /
+        2;
     for (var i = 0; i < spacing.length; i++) {
       final isLeader =
           (side == TeamSide.red && i == spacing.length - 1) ||
           (side == TeamSide.blue && i == 0);
       final c = CharacterComponent(
-        position: Vector2(characterWidth / 2 + spacing[i], charHeight),
+        position: Vector2(
+          horizontalOffset + characterWidth / 2 + spacing[i] * _spacingScale,
+          characterHeight,
+        ),
         side: side,
         teamColor: color,
         isLeader: isLeader,
         phaseOffset: i * 0.09,
-        height: charHeight,
+        height: characterHeight,
       );
       members.add(c);
       add(c);

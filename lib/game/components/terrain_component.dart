@@ -2,6 +2,7 @@ import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/constants.dart';
+import 'arena_scale.dart';
 
 class TerrainComponent extends PositionComponent {
   final double groundY;
@@ -17,6 +18,9 @@ class TerrainComponent extends PositionComponent {
 
   @override
   void render(Canvas canvas) {
+    canvas.save();
+    canvas.scale(1, arenaVerticalScale);
+
     final sky = Paint()
       ..shader = const LinearGradient(
         begin: Alignment.topCenter,
@@ -56,6 +60,8 @@ class TerrainComponent extends PositionComponent {
     );
     _winMarker(canvas, centerX - winLineOffset, AppColors.red);
     _winMarker(canvas, centerX + winLineOffset, AppColors.blue);
+
+    canvas.restore();
   }
 
   void _cloud(Canvas canvas, Offset c, double w) {

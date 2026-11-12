@@ -1,6 +1,8 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 
+import 'arena_scale.dart';
+
 class RopeComponent extends PositionComponent {
   double ropePosition = 0.0;
   final double pixelsPerUnit;
@@ -38,49 +40,52 @@ class RopeComponent extends PositionComponent {
     final currentStartX = ropeStartX + (movement > 0 ? movement : 0.0);
     final currentEndX = ropeEndX + (movement < 0 ? movement : 0.0);
     final knotX =
-        (ropeStartX + ropeEndX) / 2 + ropePosition * pixelsPerUnit + _osc;
+        (ropeStartX + ropeEndX) / 2 +
+        ropePosition * pixelsPerUnit +
+        _osc * arenaVerticalScale;
+    final scaledRopeY = ropeY * arenaVerticalScale;
 
     final paint = Paint()
       ..color = const Color(0xFF8D6E63)
-      ..strokeWidth = 8
+      ..strokeWidth = 8 * arenaVerticalScale
       ..strokeCap = StrokeCap.round;
     canvas.drawLine(
-      Offset(currentStartX, ropeY),
-      Offset(currentEndX, ropeY),
+      Offset(currentStartX, scaledRopeY),
+      Offset(currentEndX, scaledRopeY),
       paint,
     );
     canvas.drawLine(
-      Offset(currentStartX, ropeY),
-      Offset(currentEndX, ropeY),
+      Offset(currentStartX, scaledRopeY),
+      Offset(currentEndX, scaledRopeY),
       Paint()
         ..color = const Color(0xFF5D4037)
-        ..strokeWidth = 2
+        ..strokeWidth = 2 * arenaVerticalScale
         ..style = PaintingStyle.stroke,
     );
     canvas.drawLine(
-      Offset(currentStartX + 8, ropeY - 1.5),
-      Offset(currentEndX - 8, ropeY - 1.5),
+      Offset(currentStartX + 8, scaledRopeY - 1.5 * arenaVerticalScale),
+      Offset(currentEndX - 8, scaledRopeY - 1.5 * arenaVerticalScale),
       Paint()
         ..color = Colors.white.withValues(alpha: 0.35)
-        ..strokeWidth = 2.5,
+        ..strokeWidth = 2.5 * arenaVerticalScale,
     );
 
     canvas.drawCircle(
-      Offset(knotX, ropeY),
-      12,
+      Offset(knotX, scaledRopeY),
+      12 * arenaVerticalScale,
       Paint()..color = const Color(0xFFFDD835),
     );
     canvas.drawCircle(
-      Offset(knotX, ropeY),
-      12,
+      Offset(knotX, scaledRopeY),
+      12 * arenaVerticalScale,
       Paint()
         ..color = const Color(0xFFC49000)
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 2,
+        ..strokeWidth = 2 * arenaVerticalScale,
     );
     canvas.drawCircle(
-      Offset(knotX, ropeY),
-      5,
+      Offset(knotX, scaledRopeY),
+      5 * arenaVerticalScale,
       Paint()..color = const Color(0xFFFFF176),
     );
   }
