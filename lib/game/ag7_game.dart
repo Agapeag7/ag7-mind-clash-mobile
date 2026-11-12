@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flame/components.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
@@ -9,18 +11,11 @@ import 'components/team_component.dart';
 import 'components/terrain_component.dart';
 
 class Ag7Game extends FlameGame {
-  static final Vector2 virtualSize = Vector2(720, 230);
-
   late TerrainComponent terrain;
   late TeamComponent redTeam;
   late TeamComponent blueTeam;
   late RopeComponent rope;
 
-  final double groundY = 175;
-  final double centerX = 360;
-  final double winLineOffset = 85;
-  final double characterHeight = 82;
-  final double characterSpacing = 65;
   double pixelsPerUnit = 0;
 
   bool _ready = false;
@@ -32,51 +27,113 @@ class Ag7Game extends FlameGame {
   @override
   Future<void> onLoad() async {
     camera.viewfinder.anchor = Anchor.topLeft;
-    camera.viewfinder.visibleGameSize = virtualSize;
-    pixelsPerUnit = winLineOffset / 5;
+    camera.viewfinder.visibleGameSize = size;
+
+    final characterHeight = math.min(size.x * 0.4, size.y * 0.6);
+    final characterSpacing = characterHeight * 0.28;
+    final teamWidth = characterHeight * 0.62 + characterSpacing;
+    final teamCenterOffset = math.min(
+      size.x * 0.23,
+      size.x / 2 - teamWidth / 2 - size.x * 0.03,
+    );
+    final groundY = size.y * 0.78;
+    final teamTop = groundY - characterHeight;
 
     terrain = TerrainComponent(
-      size: virtualSize,
+      size: size,
       groundY: groundY,
-      centerX: centerX,
-      winLineOffset: winLineOffset,
+      centerX: size.x / 2,
+      winLineOffset: size.x * 0.18,
     );
     add(terrain);
 
-    final teamWidth = characterHeight * 0.62 + characterSpacing * 2;
-    final teamTop = groundY - characterHeight;
-    const teamCenterOffset = 158.0;
-
-    // Rouge : 3 personnages à gauche. Le leader est le plus à droite.
     redTeam = TeamComponent(
-      position: Vector2(centerX - teamWidth / 2 - teamCenterOffset, teamTop),
+      position: Vector2(
+        size.x / 2 - teamCenterOffset - teamWidth / 2,
+        teamTop,
+      ),
       side: TeamSide.red,
       color: AppColors.red,
-      spacing: [0, characterSpacing, characterSpacing * 2],
+      spacing: [0, characterSpacing],
       charHeight: characterHeight,
     );
     add(redTeam);
 
-    // Bleu : leader le plus à gauche.
     blueTeam = TeamComponent(
-      position: Vector2(centerX - teamWidth / 2 + teamCenterOffset, teamTop),
+      position: Vector2(
+        size.x / 2 + teamCenterOffset - teamWidth / 2,
+        teamTop,
+      ),
       side: TeamSide.blue,
       color: AppColors.blue,
-      spacing: [0, characterSpacing, characterSpacing * 2],
+      spacing: [0, characterSpacing],
       charHeight: characterHeight,
     );
     add(blueTeam);
 
     rope = RopeComponent(
-      ropeStartX: centerX - 120,
-      ropeEndX: centerX + 120,
-      ropeY: groundY - 43,
-      pixelsPerUnit: pixelsPerUnit,
+      ropeStartX: size.x * 0.02,
+      ropeEndX: size.x * 0.98,
+      ropeY: groundY - characterHeight * 0.52,
+      pixelsPerUnit: size.x * 0.035,
     );
     add(rope);
 
     _ready = true;
+    _layoutArena(size);
     setTugging(TeamSide.red);
+  }
+
+  @override
+  void onGameResize(Vector2 size) {
+    super.onGameResize(size);
+    camera.viewfinder.visibleGameSize = size;
+    if (_ready) _layoutArena(size);
+  }
+
+  void _layoutArena(Vector2 arenaSize) {
+    final width = arenaSize.x;
+    final height = arenaSize.y;
+    final centerX = width / 2;
+    final groundY = height * 0.78;
+    final characterHeight = math.min(width * 0.4, height * 0.6);
+    final characterSpacing = characterHeight * 0.28;
+    final teamWidth = characterHeight * 0.62 + characterSpacing;
+    final teamCenterOffset = math.min(
+      width * 0.23,
+      centerX - teamWidth / 2 - width * 0.03,
+    );
+    final teamTop = groundY - characterHeight;
+
+    terrain.layout(
+      size: arenaSize,
+      groundY: groundY,
+      centerX: centerX,
+      winLineOffset: width * 0.18,
+    );
+    redTeam.layout(
+      position: Vector2(
+        centerX - teamCenterOffset - teamWidth / 2,
+        teamTop,
+      ),
+      spacing: characterSpacing,
+      charHeight: characterHeight,
+    );
+    blueTeam.layout(
+      position: Vector2(
+        centerX + teamCenterOffset - teamWidth / 2,
+        teamTop,
+      ),
+      spacing: characterSpacing,
+      charHeight: characterHeight,
+    );
+    pixelsPerUnit = width * 0.035;
+    rope.layout(
+      ropeStartX: width * 0.02,
+      ropeEndX: width * 0.98,
+      ropeY: groundY - characterHeight * 0.52,
+      pixelsPerUnit: pixelsPerUnit,
+    );
   }
 
   void setTugging(TeamSide activeSide) {

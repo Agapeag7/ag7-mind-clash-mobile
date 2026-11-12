@@ -240,7 +240,7 @@ class _GameScreenState extends State<GameScreen> {
     );
   }
 
-  Widget _buildArena({required double height}) {
+  Widget _buildArena() {
     final game = _game;
     return Container(
       decoration: BoxDecoration(
@@ -258,7 +258,7 @@ class _GameScreenState extends State<GameScreen> {
         borderRadius: BorderRadius.circular(11),
         child: SizedBox(
           width: double.infinity,
-          height: height,
+          height: double.infinity,
           child: Stack(
             children: [
               Positioned.fill(child: GameWidget(game: game)),
@@ -441,8 +441,7 @@ class _GameScreenState extends State<GameScreen> {
                 ],
               ),
               SizedBox(height: compact ? 3 : 6),
-              _buildArena(height: compact ? 64 : 80),
-              const Spacer(),
+              Expanded(child: _buildArena()),
               SizedBox(height: spacing),
               Row(
                 children: [
