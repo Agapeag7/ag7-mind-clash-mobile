@@ -1,0 +1,30 @@
+import 'package:flame/components.dart';
+import 'package:ag7_mind_clash/core/enums.dart';
+import 'package:ag7_mind_clash/game/components/team_component.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+void main() {
+  group('TeamComponent', () {
+    for (final side in TeamSide.values) {
+      test('$side spaces members and puts the leader in front', () {
+        const characterHeight = 100.0;
+        const characterSpacing = 55.0;
+        final team = TeamComponent(
+          position: Vector2.zero(),
+          side: side,
+          color: Colors.red,
+          spacing: const [0, characterSpacing],
+          charHeight: characterHeight,
+        );
+        final leader = team.members.singleWhere((member) => member.isLeader);
+        final other = team.members.singleWhere((member) => !member.isLeader);
+
+        expect((leader.position.x - other.position.x).abs(), characterSpacing);
+        expect(leader.position.y, characterHeight);
+        expect(other.position.y, lessThan(leader.position.y));
+        expect(leader.priority, greaterThan(other.priority));
+      });
+    }
+  });
+}

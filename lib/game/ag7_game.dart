@@ -30,7 +30,7 @@ class Ag7Game extends FlameGame {
     camera.viewfinder.visibleGameSize = size;
 
     final characterHeight = math.min(size.x * 0.4, size.y * 0.6);
-    final characterSpacing = characterHeight * 0.28;
+    final characterSpacing = characterHeight * 0.55;
     final teamWidth = characterHeight * 0.62 + characterSpacing;
     final teamCenterOffset = math.min(
       size.x * 0.23,
@@ -76,7 +76,7 @@ class Ag7Game extends FlameGame {
       ropeEndX: size.x * 0.98,
       ropeY: groundY - characterHeight * 0.52,
       pixelsPerUnit: size.x * 0.035,
-    );
+    )..teams = [redTeam, blueTeam];
     add(rope);
 
     _ready = true;
@@ -97,7 +97,7 @@ class Ag7Game extends FlameGame {
     final centerX = width / 2;
     final groundY = height * 0.78;
     final characterHeight = math.min(width * 0.4, height * 0.6);
-    final characterSpacing = characterHeight * 0.28;
+    final characterSpacing = characterHeight * 0.55;
     final teamWidth = characterHeight * 0.62 + characterSpacing;
     final teamCenterOffset = math.min(
       width * 0.23,

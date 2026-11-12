@@ -1,12 +1,15 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 
+import 'team_component.dart';
+
 class RopeComponent extends PositionComponent {
   double ropePosition = 0.0;
   double pixelsPerUnit;
   double ropeY;
   double ropeStartX;
   double ropeEndX;
+  List<TeamComponent> teams = [];
 
   double _osc = 0;
   double _oscSpeed = 0;
@@ -97,5 +100,17 @@ class RopeComponent extends PositionComponent {
       5,
       Paint()..color = const Color(0xFFFFF176),
     );
+
+    for (final team in teams) {
+      for (final member in team.members) {
+        member.renderRopeArm(
+          canvas,
+          Offset(
+            team.position.x + member.position.x - member.size.x / 2,
+            team.position.y + member.position.y - member.size.y,
+          ),
+        );
+      }
+    }
   }
 }

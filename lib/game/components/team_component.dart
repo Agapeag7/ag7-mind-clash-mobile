@@ -5,7 +5,8 @@ import '../../core/enums.dart';
 import 'character_component.dart';
 
 class TeamComponent extends PositionComponent {
-  static const double _spacingScale = 0.7;
+  static const double _spacingScale = 1;
+  static const double _backRowOffset = 0.08;
 
   final TeamSide side;
   final List<CharacterComponent> members = [];
@@ -38,6 +39,7 @@ class TeamComponent extends PositionComponent {
       members.add(c);
       add(c);
     }
+    _setMemberDepthOrder();
     _layoutMembers(spacing, charHeight);
   }
 
@@ -54,6 +56,7 @@ class TeamComponent extends PositionComponent {
       List<double>.generate(members.length, (index) => index * spacing),
       charHeight,
     );
+    _setMemberDepthOrder();
   }
 
   void _layoutMembers(List<double> spacing, double characterHeight) {
@@ -67,9 +70,16 @@ class TeamComponent extends PositionComponent {
           horizontalOffset +
               characterWidth / 2 +
               spacing[i] * _spacingScale,
-          characterHeight,
+          characterHeight -
+              (members[i].isLeader ? 0 : characterHeight * _backRowOffset),
         )
         ..size.setValues(characterWidth, characterHeight);
+    }
+  }
+
+  void _setMemberDepthOrder() {
+    for (final member in members) {
+      member.priority = member.isLeader ? 1 : 0;
     }
   }
 

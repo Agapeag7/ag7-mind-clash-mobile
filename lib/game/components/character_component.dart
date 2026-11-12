@@ -67,11 +67,7 @@ class CharacterComponent extends PositionComponent {
 
   @override
   void render(Canvas canvas) {
-    final def = CharacterAnimations.forState(_state);
-    final t = def.loop
-        ? (_stateTime % def.duration).toDouble()
-        : _stateTime.clamp(0.0, def.duration).toDouble();
-    final pose = def.poseAt(t);
+    final pose = _currentPose;
     final scale = size.y / 160;
 
     canvas.save();
@@ -84,6 +80,45 @@ class CharacterComponent extends PositionComponent {
     }
     _drawCharacter(canvas, pose);
     canvas.restore();
+  }
+
+  void renderRopeArm(Canvas canvas, Offset topLeft) {
+    final pose = _currentPose;
+    final scale = size.y / 160;
+    final cx = 160 * 0.62 / 2;
+    const feetY = 157.0;
+    final hipY = feetY - 40;
+    final shoulderY = hipY - 42;
+
+    canvas.save();
+    canvas.translate(topLeft.dx + size.x / 2, topLeft.dy + size.y);
+    canvas.scale(scale);
+    canvas.translate(-size.x / (2 * scale), -160);
+    if (side == TeamSide.blue) {
+      canvas.translate(size.x / scale, 0);
+      canvas.scale(-1, 1);
+    }
+
+    canvas.translate(pose.horizontalOffset, pose.verticalOffset);
+    if (pose.squash != 1.0) {
+      canvas.translate(cx, feetY);
+      canvas.scale(1.0, pose.squash);
+      canvas.translate(-cx, -feetY);
+    }
+
+    canvas.translate(cx, hipY);
+    canvas.rotate(pose.bodyLean);
+    canvas.translate(-cx, -hipY);
+    _drawArm(canvas, cx + 6, shoulderY + 3, pose.armR, back: false);
+    canvas.restore();
+  }
+
+  CharacterPose get _currentPose {
+    final def = CharacterAnimations.forState(_state);
+    final t = def.loop
+        ? (_stateTime % def.duration).toDouble()
+        : _stateTime.clamp(0.0, def.duration).toDouble();
+    return def.poseAt(t);
   }
 
   void _drawCharacter(Canvas canvas, CharacterPose pose) {
