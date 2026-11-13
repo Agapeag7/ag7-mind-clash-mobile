@@ -76,16 +76,22 @@ class _GameScreenState extends State<GameScreen> {
     final rope = _gm.ropePosition;
     AnimationState? redReaction;
     AnimationState? blueReaction;
-    if (rope < _lastRope - 0.05) {
-      redReaction = AnimationState.strongPull;
-      blueReaction = AnimationState.slip;
-    } else if (rope > _lastRope + 0.05) {
-      blueReaction = AnimationState.strongPull;
-      redReaction = AnimationState.slip;
-    } else if (_gm.phase == GamePhase.activeTurn && !_gm.isRedTurn) {
-      // L'adversaire tire
-      blueReaction = null;
-      redReaction = null;
+    final pullingSide = _gm.isRedTurn ? TeamSide.red : TeamSide.blue;
+    final isTugging =
+        _gm.phase == GamePhase.activeTurn ||
+        _gm.phase == GamePhase.answerValidated ||
+        _gm.phase == GamePhase.transition;
+    if (isTugging) {
+      _game.setTugging(pullingSide);
+      if ((rope - _lastRope).abs() > 0.05) {
+        if (pullingSide == TeamSide.red) {
+          redReaction = AnimationState.strongPull;
+          blueReaction = AnimationState.slip;
+        } else {
+          blueReaction = AnimationState.strongPull;
+          redReaction = AnimationState.slip;
+        }
+      }
     }
     _lastRope = rope;
     _game.setRopePosition(
@@ -93,9 +99,6 @@ class _GameScreenState extends State<GameScreen> {
       redReaction: redReaction,
       blueReaction: blueReaction,
     );
-    if (_gm.phase == GamePhase.activeTurn) {
-      _game.setTugging(_gm.isRedTurn ? TeamSide.red : TeamSide.blue);
-    }
 
     if (_gm.phase == GamePhase.roundOver && !_handlingEnd) {
       _handlingEnd = true;

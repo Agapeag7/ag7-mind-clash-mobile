@@ -1,5 +1,6 @@
 import 'package:flame/components.dart';
 import 'package:ag7_mind_clash/core/enums.dart';
+import 'package:ag7_mind_clash/game/components/character_component.dart';
 import 'package:ag7_mind_clash/game/components/rope_component.dart';
 import 'package:ag7_mind_clash/game/components/team_component.dart';
 import 'package:flutter/material.dart';
@@ -149,6 +150,30 @@ void main() {
       expect(gripAfter.dx, closeTo(gripBefore.dx - 30, 0.001));
       expect(gripAfter.dy, closeTo(gripBefore.dy, 0.001));
     });
+
+    for (final state in [AnimationState.pull, AnimationState.struggle]) {
+      test('red and blue grips mirror the rendered $state arm', () {
+        final redCharacter = CharacterComponent(
+          position: Vector2.zero(),
+          side: TeamSide.red,
+          teamColor: Colors.red,
+          phaseOffset: 0,
+        )..play(state);
+        final blueCharacter = CharacterComponent(
+          position: Vector2.zero(),
+          side: TeamSide.blue,
+          teamColor: Colors.blue,
+          phaseOffset: 0,
+        )..play(state);
+
+        final redGrip = redCharacter.ropeGripPosition(Offset.zero);
+        final blueGrip = blueCharacter.ropeGripPosition(Offset.zero);
+        final characterWidth = redCharacter.size.x;
+
+        expect(redGrip.dx + blueGrip.dx, closeTo(characterWidth, 0.001));
+        expect(redGrip.dy, closeTo(blueGrip.dy, 0.001));
+      });
+    }
 
     test('team position stays attached to the rope after a layout change', () {
       final team = TeamComponent(

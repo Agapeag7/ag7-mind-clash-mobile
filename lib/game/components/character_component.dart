@@ -135,10 +135,6 @@ class CharacterComponent extends PositionComponent {
         math.cos(angle) * upperLength +
         math.cos(forearmAngle) * forearmLength;
 
-    if (side == TeamSide.blue) {
-      x = 160 * 0.62 - x;
-    }
-
     final dx = x - cx;
     final dy = y - hipY;
     final cosLean = math.cos(pose.bodyLean);
@@ -146,11 +142,14 @@ class CharacterComponent extends PositionComponent {
     x = cx + dx * cosLean - dy * sinLean;
     y = hipY + dx * sinLean + dy * cosLean;
     y = feetY + (y - feetY) * pose.squash;
+    x += pose.horizontalOffset;
+    y += pose.verticalOffset;
 
-    return Offset(
-      topLeft.dx + (x + pose.horizontalOffset) * scale,
-      topLeft.dy + (y + pose.verticalOffset) * scale,
-    );
+    if (side == TeamSide.blue) {
+      x = 160 * 0.62 - x;
+    }
+
+    return Offset(topLeft.dx + x * scale, topLeft.dy + y * scale);
   }
 
   CharacterPose get _currentPose {
