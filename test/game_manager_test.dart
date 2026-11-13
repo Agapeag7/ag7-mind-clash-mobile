@@ -123,7 +123,7 @@ void main() {
     },
   );
 
-  test('Le vol de temps réduit le prochain tour adverse à 70 %', () async {
+  test('Le vol de temps réduit le prochain tour adverse à 30 %', () async {
     final gm = GameManager(config: DifficultyConfig.byLevel(1), isVsAI: false);
     gm.startNewGame();
     final bonus = PowerUp.catalog.singleWhere(
@@ -136,7 +136,8 @@ void main() {
     await Future<void>.delayed(const Duration(milliseconds: 650));
 
     expect(gm.isRedTurn, isFalse);
-    expect(gm.turnTimeLimit, closeTo(gm.maxTime * 0.7, 0.001));
+    expect(gm.turnTimeLimit, closeTo(gm.maxTime * 0.3, 0.001));
+    expect(gm.timeLeft / gm.maxTime, closeTo(0.3, 0.001));
     gm.dispose();
   });
 
@@ -197,7 +198,7 @@ void main() {
 
     try {
       expect(gm.isRedTurn, isTrue);
-      expect(gm.turnTimeLimit, closeTo(gm.maxTime * 0.7, 0.001));
+      expect(gm.turnTimeLimit, closeTo(gm.maxTime * 0.3, 0.001));
       expect(gm.phase, GamePhase.activeTurn);
       gm.submitAnswer(gm.question!.correctAnswer);
       expect(gm.ropePosition, 1);

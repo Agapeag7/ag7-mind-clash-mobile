@@ -84,20 +84,20 @@ class RopeComponent extends PositionComponent {
 
     canvas.drawCircle(
       Offset(knotX, ropeY),
-      12,
+      8,
       Paint()..color = const Color(0xFFFDD835),
     );
     canvas.drawCircle(
       Offset(knotX, ropeY),
-      12,
+      8,
       Paint()
         ..color = const Color(0xFFC49000)
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 2,
+        ..strokeWidth = 1.5,
     );
     canvas.drawCircle(
       Offset(knotX, ropeY),
-      5,
+      3,
       Paint()..color = const Color(0xFFFFF176),
     );
 

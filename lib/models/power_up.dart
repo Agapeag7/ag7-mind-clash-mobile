@@ -28,7 +28,7 @@ class PowerUp {
       type: PowerUpType.timeTheft,
       name: 'Vol de temps',
       description:
-          'Au prochain tour adverse, le chronomètre ne garde que 70 % du temps.',
+          'Au prochain tour adverse, le chronomètre ne garde que 30 % du temps.',
     ),
     PowerUp(
       type: PowerUpType.illusion,

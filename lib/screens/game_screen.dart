@@ -447,9 +447,9 @@ class _GameScreenState extends State<GameScreen> {
                 children: [
                   Expanded(
                     child: LinearProgressIndicator(
-                      value: _gm.turnTimeLimit == 0
+                      value: _gm.maxTime == 0
                           ? 0
-                          : (_gm.timeLeft / _gm.turnTimeLimit).clamp(0.0, 1.0),
+                          : (_gm.timeLeft / _gm.maxTime).clamp(0.0, 1.0),
                       minHeight: compact ? 6 : 8,
                       backgroundColor: Colors.black12,
                       valueColor: AlwaysStoppedAnimation(activeColor),

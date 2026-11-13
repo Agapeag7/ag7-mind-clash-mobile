@@ -56,6 +56,21 @@ void main() {
         team.resetTeam();
         expect(team.position.x, startX);
       });
+
+      test('$side follows the rope beyond the visible arena', () {
+        final team = TeamComponent(
+          position: Vector2(100, 0),
+          side: side,
+          color: Colors.red,
+          spacing: const [0, 55],
+          charHeight: 100,
+        );
+
+        team.moveWithRope(-200);
+        team.update(1);
+
+        expect(team.position.x, -100);
+      });
     }
   });
 }

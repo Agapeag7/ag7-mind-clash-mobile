@@ -53,7 +53,7 @@ class HowToPlayScreen extends StatelessWidget {
             const SizedBox(height: 18),
             const GamePageHeading(
               title: 'Les bonus',
-              subtitle: 'Utilise-les au bon moment pour prendre l’avantage.',
+              subtitle: 'Quand tu obtiens un bonus, clique dessus pendant ton tour pour l’utiliser.',
             ),
             const SizedBox(height: 12),
             GamePanel(

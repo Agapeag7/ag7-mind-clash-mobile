@@ -143,7 +143,7 @@ class GameManager extends ChangeNotifier {
     } else {
       _redTimeTheftNext = false;
     }
-    _turnTimeLimit = config.secondsPerQuestion * (timeStolen ? 0.7 : 1);
+    _turnTimeLimit = config.secondsPerQuestion * (timeStolen ? 0.3 : 1);
     _timeLeft = _turnTimeLimit;
     final illusionActive = team.isRed ? _blueIllusionNext : _redIllusionNext;
     if (team.isRed) {
