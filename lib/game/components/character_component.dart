@@ -89,6 +89,9 @@ class CharacterComponent extends PositionComponent {
     const feetY = 157.0;
     final hipY = feetY - 40;
     final shoulderY = hipY - 42;
+    final usesBackArm = _usesBackRopeArm;
+    final shoulderX = cx + (usesBackArm ? -6 : 6);
+    final armAngle = usesBackArm ? pose.armL : pose.armR;
 
     canvas.save();
     canvas.translate(topLeft.dx + size.x / 2, topLeft.dy + size.y);
@@ -109,7 +112,13 @@ class CharacterComponent extends PositionComponent {
     canvas.translate(cx, hipY);
     canvas.rotate(pose.bodyLean);
     canvas.translate(-cx, -hipY);
-    _drawArm(canvas, cx + 6, shoulderY + 3, pose.armR, back: false);
+    _drawArm(
+      canvas,
+      shoulderX,
+      shoulderY + 3,
+      armAngle,
+      back: usesBackArm,
+    );
     canvas.restore();
   }
 
@@ -122,11 +131,12 @@ class CharacterComponent extends PositionComponent {
     const shoulderY = hipY - 42;
     const upperLength = 17.0;
     const forearmLength = 15.0;
-    final angle = pose.armR;
-    final forearmAngle = angle + 0.48;
+    final usesBackArm = _usesBackRopeArm;
+    final angle = usesBackArm ? pose.armL : pose.armR;
+    final shoulderX = cx + (usesBackArm ? -6 : 6);
+    final forearmAngle = angle + (usesBackArm ? -0.48 : 0.48);
     var x =
-        cx +
-        6 +
+        shoulderX +
         math.sin(angle) * upperLength +
         math.sin(forearmAngle) * forearmLength;
     var y =
@@ -151,6 +161,11 @@ class CharacterComponent extends PositionComponent {
 
     return Offset(topLeft.dx + x * scale, topLeft.dy + y * scale);
   }
+
+  bool get _usesBackRopeArm =>
+      _state == AnimationState.struggle ||
+      _state == AnimationState.slip ||
+      _state == AnimationState.defeat;
 
   CharacterPose get _currentPose {
     final def = CharacterAnimations.forState(_state);

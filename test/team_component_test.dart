@@ -175,6 +175,22 @@ void main() {
       });
     }
 
+    test('resisting character grips the rope with the opposite arm', () {
+      final character = CharacterComponent(
+        position: Vector2.zero(),
+        side: TeamSide.red,
+        teamColor: Colors.red,
+        phaseOffset: 0,
+      );
+
+      character.play(AnimationState.pull);
+      final pullingGrip = character.ropeGripPosition(Offset.zero);
+      character.play(AnimationState.struggle);
+      final resistingGrip = character.ropeGripPosition(Offset.zero);
+
+      expect(resistingGrip.dx, isNot(closeTo(pullingGrip.dx, 0.01)));
+    });
+
     test('team position stays attached to the rope after a layout change', () {
       final team = TeamComponent(
         position: Vector2(100, 0),
