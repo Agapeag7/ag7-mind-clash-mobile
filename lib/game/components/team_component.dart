@@ -6,13 +6,11 @@ import 'character_component.dart';
 
 class TeamComponent extends PositionComponent {
   static const double _spacingScale = 1;
-  static const double _maxPullBackScale = 0.22;
 
   final TeamSide side;
   final List<CharacterComponent> members = [];
   final Color color;
   late double _homeX = position.x;
-  late double _targetX = position.x;
   double _movementOffset = 0;
 
   TeamComponent({
@@ -54,8 +52,7 @@ class TeamComponent extends PositionComponent {
     this.position.setFrom(position);
     _homeX = position.x;
     _movementOffset = normalizedOffset * charHeight;
-    _targetX = _homeX + _movementOffset;
-    this.position.x = _targetX;
+    this.position.x = _homeX + _movementOffset;
     size.setValues(spacing + charHeight * 0.62, charHeight);
     _layoutMembers(
       List<double>.generate(members.length, (index) => index * spacing),
@@ -87,30 +84,9 @@ class TeamComponent extends PositionComponent {
     }
   }
 
-  @override
-  void update(double dt) {
-    super.update(dt);
-    final delta = _targetX - position.x;
-    if (delta.abs() < 0.1) {
-      position.x = _targetX;
-    } else {
-      position.x += delta * (dt * 8).clamp(0.0, 1.0).toDouble();
-    }
-  }
-
-  void pullBack(double distance) {
-    final direction = side == TeamSide.red ? -1.0 : 1.0;
-    final maxPullBack = size.y * _maxPullBackScale;
-    _movementOffset = (_movementOffset + distance * direction)
-        .clamp(-maxPullBack, maxPullBack)
-        .toDouble();
-    _targetX = _homeX + _movementOffset;
-  }
-
   void moveWithRope(double distance) {
     _movementOffset += distance;
-    _targetX = _homeX + _movementOffset;
-    position.x += distance;
+    position.x = _homeX + _movementOffset;
   }
 
   void playTeam(
@@ -125,7 +101,6 @@ class TeamComponent extends PositionComponent {
 
   void resetTeam() {
     _movementOffset = 0;
-    _targetX = _homeX;
     position.x = _homeX;
     for (final m in members) {
       m.play(AnimationState.idle);

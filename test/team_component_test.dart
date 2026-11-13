@@ -34,7 +34,7 @@ void main() {
         expect(rope.priority, greaterThan(team.priority));
       });
 
-      test('$side moves back smoothly when pulling', () {
+      test('$side moves with the rope and returns to its starting point', () {
         final team = TeamComponent(
           position: Vector2(100, 0),
           side: side,
@@ -44,14 +44,8 @@ void main() {
         );
         final startX = team.position.x;
 
-        team.pullBack(20);
-        team.update(0.1);
-
-        if (side == TeamSide.red) {
-          expect(team.position.x, lessThan(startX));
-        } else {
-          expect(team.position.x, greaterThan(startX));
-        }
+        team.moveWithRope(-20);
+        expect(team.position.x, startX - 20);
 
         team.resetTeam();
         expect(team.position.x, startX);
@@ -67,7 +61,6 @@ void main() {
         );
 
         team.moveWithRope(-200);
-        team.update(1);
 
         expect(team.position.x, -100);
       });
@@ -82,16 +75,14 @@ void main() {
         );
 
         team.moveWithRope(20);
-        team.update(1);
         expect(team.position.x, 120);
 
         team.moveWithRope(-30);
-        team.update(1);
         expect(team.position.x, 90);
       });
     }
 
-    test('the opposing team is dragged farther toward the pulling team', () {
+    test('each tug alternates retreat and advance without closing the gap', () {
       final redTeam = TeamComponent(
         position: Vector2(100, 0),
         side: TeamSide.red,
@@ -108,21 +99,31 @@ void main() {
       );
       final redStartX = redTeam.position.x;
       final blueStartX = blueTeam.position.x;
+      final startingGap = blueStartX - (redStartX + redTeam.size.x);
 
-      redTeam.moveWithRope(-25);
-      blueTeam.moveWithRope(-50);
-      redTeam.update(1);
-      blueTeam.update(1);
+      const redWinningMovement = -25.0;
+      redTeam.moveWithRope(redWinningMovement);
+      blueTeam.moveWithRope(redWinningMovement);
 
       expect(redTeam.position.x, lessThan(redStartX));
       expect(blueTeam.position.x, lessThan(blueStartX));
-      expect(
-        blueStartX - blueTeam.position.x,
-        greaterThan(redStartX - redTeam.position.x),
-      );
+      expect(redStartX - redTeam.position.x, redWinningMovement.abs());
       expect(
         blueTeam.position.x - (redTeam.position.x + redTeam.size.x),
-        lessThan(blueStartX - (redStartX + redTeam.size.x)),
+        closeTo(startingGap, 0.001),
+      );
+
+      const blueWinningMovement = 25.0;
+      redTeam.moveWithRope(blueWinningMovement);
+      blueTeam.moveWithRope(blueWinningMovement);
+
+      expect(redTeam.position.x, greaterThan(redStartX - 25));
+      expect(blueTeam.position.x, greaterThan(blueStartX - 25));
+      expect(redTeam.position.x, closeTo(redStartX, 0.001));
+      expect(blueTeam.position.x, closeTo(blueStartX, 0.001));
+      expect(
+        blueTeam.position.x - (redTeam.position.x + redTeam.size.x),
+        closeTo(startingGap, 0.001),
       );
     });
 

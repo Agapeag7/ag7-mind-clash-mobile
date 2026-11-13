@@ -3,8 +3,9 @@
 Jeu mobile Android de tir à la corde mathématique, avec personnages cartoon 2D
 dessinés en code et illustrations PNG transparentes pour les modes et résultats.
 Les bonnes réponses déplacent progressivement la corde et les équipes avec elle :
-l'équipe qui tire recule vers son camp, tandis que l'équipe adverse est entraînée
-plus loin vers elle. Les mains restent accrochées à la corde pendant le mouvement.
+l'équipe gagnante recule vers son camp tandis que l'équipe adverse avance vers
+elle. Le mouvement s'inverse quand l'autre équipe gagne, sans modifier l'écart
+entre les équipes. Les mains restent accrochées à la corde pendant le mouvement.
 Les manches se jouent en portrait dans une arène verticale qui s’adapte à l’espace
 disponible au-dessus du chronomètre, avec les commandes visibles à l’écran sans défilement.
 

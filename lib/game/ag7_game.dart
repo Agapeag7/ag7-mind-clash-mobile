@@ -212,10 +212,9 @@ class Ag7Game extends FlameGame {
     final displayedPosition = rope.displayedPosition;
     final delta = displayedPosition - _lastDisplayedRopePosition;
     if (delta.abs() > 0.0001) {
-      final pullingTeam = delta < 0 ? redTeam : blueTeam;
-      final pulledTeam = delta < 0 ? blueTeam : redTeam;
-      pullingTeam.moveWithRope(delta * pixelsPerUnit * 1.25);
-      pulledTeam.moveWithRope(delta * pixelsPerUnit * 2.0);
+      final sharedMovement = delta * pixelsPerUnit;
+      redTeam.moveWithRope(sharedMovement);
+      blueTeam.moveWithRope(sharedMovement);
       _lastDisplayedRopePosition = displayedPosition;
     }
   }
