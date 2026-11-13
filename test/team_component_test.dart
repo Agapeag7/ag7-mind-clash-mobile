@@ -125,5 +125,58 @@ void main() {
         lessThan(blueStartX - (redStartX + redTeam.size.x)),
       );
     });
+
+    test('a character grip moves with the team position', () {
+      final team = TeamComponent(
+        position: Vector2(100, 0),
+        side: TeamSide.red,
+        color: Colors.red,
+        spacing: const [0, 55],
+        charHeight: 100,
+      );
+      final member = team.members.first;
+      final topLeft = Offset(
+        team.position.x + member.position.x - member.size.x / 2,
+        team.position.y + member.position.y - member.size.y,
+      );
+      final gripBefore = member.ropeGripPosition(topLeft);
+
+      team.moveWithRope(-30);
+      final movedTopLeft = Offset(topLeft.dx - 30, topLeft.dy);
+      final gripAfter = member.ropeGripPosition(movedTopLeft);
+
+      expect(gripAfter.dx, closeTo(gripBefore.dx - 30, 0.001));
+      expect(gripAfter.dy, closeTo(gripBefore.dy, 0.001));
+    });
+
+    test('team position stays attached to the rope after a layout change', () {
+      final team = TeamComponent(
+        position: Vector2(100, 0),
+        side: TeamSide.red,
+        color: Colors.red,
+        spacing: const [0, 55],
+        charHeight: 100,
+      );
+
+      team.moveWithRope(-20);
+      team.layout(position: Vector2(200, 0), spacing: 66, charHeight: 120);
+
+      expect(team.position.x, closeTo(176, 0.001));
+    });
+
+    test('rope eases toward its new position instead of teleporting', () {
+      final rope = RopeComponent(
+        ropeStartX: 0,
+        ropeEndX: 400,
+        ropeY: 100,
+        pixelsPerUnit: 10,
+      );
+
+      rope.setPosition(-1);
+      rope.advance(0.05);
+
+      expect(rope.displayedPosition, lessThan(0));
+      expect(rope.displayedPosition, greaterThan(-1));
+    });
   });
 }

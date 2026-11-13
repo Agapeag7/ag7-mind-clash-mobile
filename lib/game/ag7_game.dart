@@ -20,6 +20,7 @@ class Ag7Game extends FlameGame {
 
   bool _ready = false;
   TeamSide? _activeSide;
+  double _lastDisplayedRopePosition = 0;
 
   @override
   Color backgroundColor() => AppColors.bgBottom;
@@ -152,15 +153,7 @@ class Ag7Game extends FlameGame {
   }) {
     if (!_ready) return;
     final position = pos.clamp(-5.0, 5.0).toDouble();
-    final delta = position - rope.ropePosition;
     rope.setPosition(position);
-    if (delta != 0) {
-      final movementDirection = delta.sign;
-      final pullingTeam = movementDirection < 0 ? redTeam : blueTeam;
-      final pulledTeam = movementDirection < 0 ? blueTeam : redTeam;
-      pullingTeam.moveWithRope(delta * pixelsPerUnit * 1.25);
-      pulledTeam.moveWithRope(delta * pixelsPerUnit * 2.0);
-    }
     final pullingSide = _activeSide ?? TeamSide.red;
     final pullingAnimation = pullingSide == TeamSide.red
         ? AnimationState.pull
@@ -203,10 +196,27 @@ class Ag7Game extends FlameGame {
   }
 
   void resetRound() {
-    rope.setPosition(0);
+    rope.snapToPosition(0);
+    _lastDisplayedRopePosition = 0;
     redTeam.resetTeam();
     blueTeam.resetTeam();
     _activeSide = null;
     setTugging(TeamSide.red);
+  }
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+    if (!_ready) return;
+
+    final displayedPosition = rope.displayedPosition;
+    final delta = displayedPosition - _lastDisplayedRopePosition;
+    if (delta.abs() > 0.0001) {
+      final pullingTeam = delta < 0 ? redTeam : blueTeam;
+      final pulledTeam = delta < 0 ? blueTeam : redTeam;
+      pullingTeam.moveWithRope(delta * pixelsPerUnit * 1.25);
+      pulledTeam.moveWithRope(delta * pixelsPerUnit * 2.0);
+      _lastDisplayedRopePosition = displayedPosition;
+    }
   }
 }

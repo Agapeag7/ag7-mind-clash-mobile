@@ -113,6 +113,46 @@ class CharacterComponent extends PositionComponent {
     canvas.restore();
   }
 
+  Offset ropeGripPosition(Offset topLeft) {
+    final pose = _currentPose;
+    final scale = size.y / 160;
+    const cx = 160 * 0.62 / 2;
+    const feetY = 157.0;
+    const hipY = feetY - 40;
+    const shoulderY = hipY - 42;
+    const upperLength = 17.0;
+    const forearmLength = 15.0;
+    final angle = pose.armR;
+    final forearmAngle = angle + 0.48;
+    var x =
+        cx +
+        6 +
+        math.sin(angle) * upperLength +
+        math.sin(forearmAngle) * forearmLength;
+    var y =
+        shoulderY +
+        3 +
+        math.cos(angle) * upperLength +
+        math.cos(forearmAngle) * forearmLength;
+
+    if (side == TeamSide.blue) {
+      x = 160 * 0.62 - x;
+    }
+
+    final dx = x - cx;
+    final dy = y - hipY;
+    final cosLean = math.cos(pose.bodyLean);
+    final sinLean = math.sin(pose.bodyLean);
+    x = cx + dx * cosLean - dy * sinLean;
+    y = hipY + dx * sinLean + dy * cosLean;
+    y = feetY + (y - feetY) * pose.squash;
+
+    return Offset(
+      topLeft.dx + (x + pose.horizontalOffset) * scale,
+      topLeft.dy + (y + pose.verticalOffset) * scale,
+    );
+  }
+
   CharacterPose get _currentPose {
     final def = CharacterAnimations.forState(_state);
     final t = def.loop

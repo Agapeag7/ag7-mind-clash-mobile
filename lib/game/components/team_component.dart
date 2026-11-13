@@ -50,10 +50,12 @@ class TeamComponent extends PositionComponent {
     required double spacing,
     required double charHeight,
   }) {
+    final normalizedOffset = size.y == 0 ? 0.0 : _movementOffset / size.y;
     this.position.setFrom(position);
     _homeX = position.x;
-    _targetX = position.x;
-    _movementOffset = 0;
+    _movementOffset = normalizedOffset * charHeight;
+    _targetX = _homeX + _movementOffset;
+    this.position.x = _targetX;
     size.setValues(spacing + charHeight * 0.62, charHeight);
     _layoutMembers(
       List<double>.generate(members.length, (index) => index * spacing),
@@ -108,6 +110,7 @@ class TeamComponent extends PositionComponent {
   void moveWithRope(double distance) {
     _movementOffset += distance;
     _targetX = _homeX + _movementOffset;
+    position.x += distance;
   }
 
   void playTeam(
