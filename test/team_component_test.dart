@@ -90,5 +90,40 @@ void main() {
         expect(team.position.x, 90);
       });
     }
+
+    test('the opposing team is dragged farther toward the pulling team', () {
+      final redTeam = TeamComponent(
+        position: Vector2(100, 0),
+        side: TeamSide.red,
+        color: Colors.red,
+        spacing: const [0, 55],
+        charHeight: 100,
+      );
+      final blueTeam = TeamComponent(
+        position: Vector2(300, 0),
+        side: TeamSide.blue,
+        color: Colors.blue,
+        spacing: const [0, 55],
+        charHeight: 100,
+      );
+      final redStartX = redTeam.position.x;
+      final blueStartX = blueTeam.position.x;
+
+      redTeam.moveWithRope(-25);
+      blueTeam.moveWithRope(-50);
+      redTeam.update(1);
+      blueTeam.update(1);
+
+      expect(redTeam.position.x, lessThan(redStartX));
+      expect(blueTeam.position.x, lessThan(blueStartX));
+      expect(
+        blueStartX - blueTeam.position.x,
+        greaterThan(redStartX - redTeam.position.x),
+      );
+      expect(
+        blueTeam.position.x - (redTeam.position.x + redTeam.size.x),
+        lessThan(blueStartX - (redStartX + redTeam.size.x)),
+      );
+    });
   });
 }
