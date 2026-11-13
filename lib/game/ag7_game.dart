@@ -155,9 +155,11 @@ class Ag7Game extends FlameGame {
     final delta = position - rope.ropePosition;
     rope.setPosition(position);
     if (delta != 0) {
-      final teamMovement = delta * pixelsPerUnit * 0.75;
-      redTeam.moveWithRope(teamMovement);
-      blueTeam.moveWithRope(teamMovement);
+      final movementDirection = delta.sign;
+      final winningTeam = movementDirection < 0 ? redTeam : blueTeam;
+      final losingTeam = movementDirection < 0 ? blueTeam : redTeam;
+      winningTeam.moveWithRope(movementDirection * pixelsPerUnit * 1.5);
+      losingTeam.moveWithRope(movementDirection * pixelsPerUnit * 0.75);
     }
     final pullingSide = _activeSide ?? TeamSide.red;
     final pullingAnimation = pullingSide == TeamSide.red

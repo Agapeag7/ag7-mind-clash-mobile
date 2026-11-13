@@ -71,6 +71,24 @@ void main() {
 
         expect(team.position.x, -100);
       });
+
+      test('$side moves visibly in either rope direction', () {
+        final team = TeamComponent(
+          position: Vector2(100, 0),
+          side: side,
+          color: Colors.red,
+          spacing: const [0, 55],
+          charHeight: 100,
+        );
+
+        team.moveWithRope(20);
+        team.update(1);
+        expect(team.position.x, 120);
+
+        team.moveWithRope(-30);
+        team.update(1);
+        expect(team.position.x, 90);
+      });
     }
   });
 }
