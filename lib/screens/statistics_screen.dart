@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/constants.dart';
 import '../providers/app_providers.dart';
+import '../services/audio_service.dart';
 import '../widgets/game_ui.dart';
 
 class StatisticsScreen extends ConsumerWidget {
@@ -10,10 +11,12 @@ class StatisticsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final stats = ref.watch(statsProvider);
-    return Scaffold(
-      appBar: AppBar(title: const Text('Mes statistiques')),
-      body: GamePageBackground(
-        child: stats.when(
+    return AudioPageMusic(
+      tracks: const ['bgm/music-page-statistique.mp3'],
+      child: Scaffold(
+        appBar: AppBar(title: const Text('Mes statistiques')),
+        body: GamePageBackground(
+          child: stats.when(
           loading: () => const Center(
             child: CircularProgressIndicator(color: AppColors.blue),
           ),
@@ -89,6 +92,7 @@ class StatisticsScreen extends ConsumerWidget {
                 ),
               ),
             ],
+          ),
           ),
         ),
       ),

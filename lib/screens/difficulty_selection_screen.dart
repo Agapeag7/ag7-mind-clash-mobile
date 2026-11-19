@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../core/constants.dart';
 import '../core/difficulty.dart';
 import '../core/enums.dart';
+import '../services/audio_service.dart';
 import '../widgets/game_ui.dart';
 import 'game_screen.dart';
 
@@ -12,12 +13,17 @@ class DifficultySelectionScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Choisis ta difficulté')),
-      body: GamePageBackground(
-        child: SafeArea(
-          child: Column(
-            children: [
+    return AudioPageMusic(
+      tracks: const [
+        'bgm/theme-music-page-sélection-niveau-difficulte-1.mp3',
+        'bgm/theme-music-sélection-niveau-difficulte-2.mp3',
+      ],
+      child: Scaffold(
+        appBar: AppBar(title: const Text('Choisis ta difficulté')),
+        body: GamePageBackground(
+          child: SafeArea(
+            child: Column(
+              children: [
               const Padding(
                 padding: EdgeInsets.fromLTRB(20, 12, 20, 16),
                 child: GamePageHeading(
@@ -39,20 +45,24 @@ class DifficultySelectionScreen extends StatelessWidget {
                     final difficulty = DifficultyConfig.all[index];
                     return _DifficultyCard(
                       difficulty: difficulty,
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => GameScreen(
-                            mode: mode,
-                            difficulty: difficulty.level,
+                      onTap: () {
+                        AudioService.menuSelection();
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => GameScreen(
+                              mode: mode,
+                              difficulty: difficulty.level,
+                            ),
                           ),
-                        ),
-                      ),
+                        );
+                      },
                     );
                   },
                 ),
               ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'core/constants.dart';
+import 'services/audio_service.dart';
 import 'screens/splash_screen.dart';
 
 class Ag7App extends StatelessWidget {
@@ -34,6 +35,7 @@ class Ag7App extends StatelessWidget {
           ),
         ),
       ),
+      navigatorObservers: [audioRouteObserver],
       home: const SplashScreen(),
     );
   }

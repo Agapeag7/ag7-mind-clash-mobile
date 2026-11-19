@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../core/constants.dart';
 import '../core/enums.dart';
+import '../services/audio_service.dart';
 import '../widgets/game_ui.dart';
 import 'difficulty_selection_screen.dart';
 
@@ -10,17 +11,23 @@ class ModeSelectionScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Choisis ton mode')),
-      body: GamePageBackground(
-        child: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 480),
-                child: Column(
-                  children: [
+    return AudioPageMusic(
+      tracks: const [
+        'bgm/music-page-choix-adversaire-1.mp3',
+        'bgm/music-page-choix-adversaire-2.mp3',
+        'bgm/music-page-choix-adversaire-3.mp3',
+      ],
+      child: Scaffold(
+        appBar: AppBar(title: const Text('Choisis ton mode')),
+        body: GamePageBackground(
+          child: SafeArea(
+            child: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(20),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 480),
+                  child: Column(
+                    children: [
                     const GamePageHeading(
                       title: 'À toi de jouer !',
                       subtitle: 'Choisis ton adversaire',
@@ -41,7 +48,8 @@ class ModeSelectionScreen extends StatelessWidget {
                       onTap: () =>
                           _goToDifficulty(context, GameMode.playerVsAI),
                     ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -77,7 +85,10 @@ class _ModeCard extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: onTap,
+        onTap: () {
+          AudioService.menuSelection();
+          onTap();
+        },
         borderRadius: BorderRadius.circular(20),
         child: GamePanel(
           padding: const EdgeInsets.fromLTRB(14, 14, 14, 16),

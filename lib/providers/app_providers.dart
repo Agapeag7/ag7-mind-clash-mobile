@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../services/audio_service.dart';
 import '../services/storage_service.dart';
 
 class AppSettings {
@@ -25,7 +26,13 @@ class AppSettings {
 }
 
 class AppSettingsNotifier extends StateNotifier<AppSettings> {
-  AppSettingsNotifier() : super(const AppSettings());
+  AppSettingsNotifier()
+    : super(
+        AppSettings(
+          musicEnabled: AudioService.musicEnabled,
+          sfxEnabled: AudioService.sfxEnabled,
+        ),
+      );
 
   void setMusic(bool v) => state = state.copyWith(musicEnabled: v);
   void setSfx(bool v) => state = state.copyWith(sfxEnabled: v);

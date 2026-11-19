@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../core/constants.dart';
+import '../services/audio_service.dart';
 
 class GamePageBackground extends StatelessWidget {
   final Widget child;
@@ -139,7 +140,12 @@ class GameActionButton extends StatelessWidget {
       width: double.infinity,
       height: height,
       child: ElevatedButton(
-        onPressed: onPressed,
+        onPressed: onPressed == null
+            ? null
+            : () {
+                AudioService.menuSelection();
+                onPressed!();
+              },
         style: ElevatedButton.styleFrom(
           backgroundColor: color,
           foregroundColor: foregroundColor,

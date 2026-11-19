@@ -14,10 +14,12 @@ class SettingsScreen extends ConsumerWidget {
     final settings = ref.watch(appSettingsProvider);
     final notifier = ref.read(appSettingsProvider.notifier);
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Paramètres')),
-      body: GamePageBackground(
-        child: ListView(
+    return AudioPageMusic(
+      tracks: const [],
+      child: Scaffold(
+        appBar: AppBar(title: const Text('Paramètres')),
+        body: GamePageBackground(
+          child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
             const GamePageHeading(
@@ -43,7 +45,7 @@ class SettingsScreen extends ConsumerWidget {
                     onChanged: (value) {
                       notifier.setMusic(value);
                       StorageService.setMusicEnabled(value);
-                      AudioService.musicEnabled = value;
+                      AudioService.setMusicEnabled(value);
                     },
                   ),
                   const Divider(height: 1, indent: 16, endIndent: 16),
@@ -61,7 +63,7 @@ class SettingsScreen extends ConsumerWidget {
                     onChanged: (value) {
                       notifier.setSfx(value);
                       StorageService.setSfxEnabled(value);
-                      AudioService.sfxEnabled = value;
+                      AudioService.setSfxEnabled(value);
                     },
                   ),
                   const Divider(height: 1, indent: 16, endIndent: 16),
@@ -93,6 +95,7 @@ class SettingsScreen extends ConsumerWidget {
               ),
             ),
           ],
+          ),
         ),
       ),
     );

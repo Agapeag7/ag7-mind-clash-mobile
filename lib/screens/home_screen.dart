@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../core/constants.dart';
+import '../services/audio_service.dart';
 import '../widgets/game_ui.dart';
 import 'how_to_play_screen.dart';
 import 'mode_selection_screen.dart';
@@ -11,16 +12,18 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: GamePageBackground(
-        child: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 420),
-                child: Column(
-                  children: [
+    return AudioPageMusic(
+      tracks: const ['bgm/music-principal-page.mp3'],
+      child: Scaffold(
+        body: GamePageBackground(
+          child: SafeArea(
+            child: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 420),
+                  child: Column(
+                    children: [
                     Image.asset(
                       'assets/icon/icone_ag7mindclash.png',
                       width: 178,
@@ -100,7 +103,8 @@ class HomeScreen extends StatelessWidget {
                         ),
                       ),
                     ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),

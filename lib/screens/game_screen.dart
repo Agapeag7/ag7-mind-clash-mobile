@@ -187,7 +187,10 @@ class _GameScreenState extends State<GameScreen> {
 
   void _onSubmit() {
     if (!_canPlayerAnswer) return;
-    if (_answerController.text.isEmpty) return;
+    if (_answerController.text.isEmpty) {
+      AudioService.submitEmpty();
+      return;
+    }
     final v = int.tryParse(_answerController.text);
     if (v == null) return;
     _answerController.clear();
@@ -231,13 +234,16 @@ class _GameScreenState extends State<GameScreen> {
     final activeTeam = _gm.activeTeam;
     final activeColor = activeTeam.isRed ? AppColors.red : AppColors.blue;
 
-    return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildHeader(activeColor),
-            Expanded(child: _buildQuestionPanel(activeColor)),
-          ],
+    return AudioPageMusic(
+      tracks: const [],
+      child: Scaffold(
+        body: SafeArea(
+          child: Column(
+            children: [
+              _buildHeader(activeColor),
+              Expanded(child: _buildQuestionPanel(activeColor)),
+            ],
+          ),
         ),
       ),
     );

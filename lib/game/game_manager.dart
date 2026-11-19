@@ -80,6 +80,7 @@ class GameManager extends ChangeNotifier {
   bool _illusionPending = false;
   int _aiRequestGeneration = 0;
   bool _isDisposed = false;
+  bool _playedLowTimeSfx = false;
 
   bool get isRedTurn => activeTeam.isRed;
 
@@ -102,6 +103,7 @@ class GameManager extends ChangeNotifier {
   }
 
   void _startRoundInternal() {
+    AudioService.roundStarted();
     _rope = 0;
     _roundWinnerSide = -1;
     _redDoubleNext = false;
@@ -152,6 +154,7 @@ class GameManager extends ChangeNotifier {
       _redIllusionNext = false;
     }
     _phase = GamePhase.activeTurn;
+    _playedLowTimeSfx = false;
     notifyListeners();
     _startTimer();
     if (illusionActive) {
@@ -191,6 +194,12 @@ class GameManager extends ChangeNotifier {
     _tick = Timer.periodic(const Duration(milliseconds: 100), (_) {
       if (_phase != GamePhase.activeTurn) return;
       _timeLeft -= 0.1;
+      if (!_playedLowTimeSfx &&
+          _turnTimeLimit > 10 &&
+          _timeLeft <= 10) {
+        _playedLowTimeSfx = true;
+        AudioService.timeAlmostUp();
+      }
       if (_timeLeft <= 0) {
         _timeLeft = 0;
         _onTimeout();
@@ -210,6 +219,7 @@ class GameManager extends ChangeNotifier {
     _illusionPending = false;
     _cancelAI();
     _totalAnswers++;
+    AudioService.timeout();
     _loseTurn();
   }
 
@@ -232,7 +242,6 @@ class GameManager extends ChangeNotifier {
       AudioService.correct();
       _handleCorrectAnswer();
     } else {
-      AudioService.wrong();
       _handleWrongAnswer();
     }
     notifyListeners();
@@ -289,6 +298,7 @@ class GameManager extends ChangeNotifier {
 
   void _handleWrongAnswer() {
     _attemptsLeft--;
+    AudioService.wrong(attemptsLeft: _attemptsLeft);
     if (_attemptsLeft > 0) {
       _phase = GamePhase.activeTurn;
       notifyListeners();
@@ -394,7 +404,7 @@ class GameManager extends ChangeNotifier {
     } else {
       _phase = GamePhase.roundOver;
     }
-    AudioService.victory();
+    AudioService.roundOver(humanWon: winner.isRed, isVsAI: isVsAI);
     notifyListeners();
   }
 
@@ -451,7 +461,7 @@ class GameManager extends ChangeNotifier {
         }
         break;
     }
-    AudioService.powerUp();
+    AudioService.powerUp(powerUp.type);
     notifyListeners();
     return true;
   }

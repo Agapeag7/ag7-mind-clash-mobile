@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../core/constants.dart';
+import '../services/audio_service.dart';
 import '../models/power_up.dart';
 import '../widgets/game_ui.dart';
 
@@ -9,10 +10,12 @@ class HowToPlayScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Comment jouer ?')),
-      body: GamePageBackground(
-        child: ListView(
+    return AudioPageMusic(
+      tracks: const ['bgm/music-page-comment-jouer.mp3'],
+      child: Scaffold(
+        appBar: AppBar(title: const Text('Comment jouer ?')),
+        body: GamePageBackground(
+          child: ListView(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
           children: [
             const GamePageHeading(
@@ -73,6 +76,7 @@ class HowToPlayScreen extends StatelessWidget {
               ),
             ),
           ],
+          ),
         ),
       ),
     );
