@@ -194,9 +194,7 @@ class GameManager extends ChangeNotifier {
     _tick = Timer.periodic(const Duration(milliseconds: 100), (_) {
       if (_phase != GamePhase.activeTurn) return;
       _timeLeft -= 0.1;
-      if (!_playedLowTimeSfx &&
-          _turnTimeLimit > 10 &&
-          _timeLeft <= 10) {
+      if (!_playedLowTimeSfx && _turnTimeLimit > 10 && _timeLeft <= 10) {
         _playedLowTimeSfx = true;
         AudioService.timeAlmostUp();
       }
@@ -239,7 +237,7 @@ class GameManager extends ChangeNotifier {
       _correctAnswers++;
       _illusionTimer?.cancel();
       _illusionPending = false;
-      AudioService.correct();
+      AudioService.correct(isVsAI: isVsAI);
       _handleCorrectAnswer();
     } else {
       _handleWrongAnswer();

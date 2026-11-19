@@ -72,9 +72,16 @@ class AudioService {
     _playSfx('sfx/debut-manche.mp3');
   }
 
-  static void correct() {
-    if (!sfxEnabled) return;
-    HapticFeedback.mediumImpact();
+  static void correct({required bool isVsAI}) {
+    if (isVsAI) {
+      _playRandomSfx([
+        'sfx/réussite-mache-vs-ia-1.mp3',
+        'sfx/réussite-mache-vs-ia-2.mp3',
+      ]);
+    } else {
+      _playSfx('sfx/reussite-manche-humain-vs-humain-1.mp3');
+    }
+    if (sfxEnabled) HapticFeedback.mediumImpact();
   }
 
   static void wrong({required int attemptsLeft}) {
@@ -139,6 +146,7 @@ class AudioService {
         );
         break;
       case PowerUpType.autoAnswer:
+        _playSfx('sfx/effet-activation-bonus-double-point.mp3');
         break;
     }
     if (sfxEnabled) HapticFeedback.lightImpact();
@@ -159,11 +167,7 @@ class AudioPageMusic extends StatefulWidget {
   final List<String> tracks;
   final Widget child;
 
-  const AudioPageMusic({
-    super.key,
-    required this.tracks,
-    required this.child,
-  });
+  const AudioPageMusic({super.key, required this.tracks, required this.child});
 
   @override
   State<AudioPageMusic> createState() => _AudioPageMusicState();
