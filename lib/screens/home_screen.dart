@@ -6,6 +6,7 @@ import 'how_to_play_screen.dart';
 import 'mode_selection_screen.dart';
 import 'settings_screen.dart';
 import 'statistics_screen.dart';
+import 'about_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -100,6 +101,19 @@ class HomeScreen extends StatelessWidget {
                         context,
                         MaterialPageRoute(
                           builder: (_) => const HowToPlayScreen(),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    GameActionButton(
+                      label: 'À PROPOS',
+                      color: Colors.white,
+                      foregroundColor: AppColors.navy,
+                      icon: Icons.info_outline_rounded,
+                      onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const AboutScreen(),
                         ),
                       ),
                     ),

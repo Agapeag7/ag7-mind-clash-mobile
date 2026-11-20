@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/constants.dart';
 import '../providers/app_providers.dart';
 import '../services/audio_service.dart';
+import '../services/notification_service.dart';
 import '../services/storage_service.dart';
 import '../widgets/game_ui.dart';
 
@@ -64,6 +65,38 @@ class SettingsScreen extends ConsumerWidget {
                       notifier.setSfx(value);
                       StorageService.setSfxEnabled(value);
                       AudioService.setSfxEnabled(value);
+                    },
+                  ),
+                  const Divider(height: 1, indent: 16, endIndent: 16),
+                  SwitchListTile(
+                    secondary: const Icon(
+                      Icons.notifications_active_rounded,
+                      color: AppColors.blue,
+                    ),
+                    title: const Text(
+                      'Rappel quotidien',
+                      style: TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                    subtitle: const Text('Après 24 h sans ouvrir le jeu'),
+                    value: settings.remindersEnabled,
+                    activeThumbColor: AppColors.green,
+                    onChanged: (value) async {
+                      final enabled = await NotificationService.setEnabled(
+                        value,
+                      );
+                      notifier.setReminders(value && enabled);
+                      await StorageService.setRemindersEnabled(
+                        value && enabled,
+                      );
+                      if (value && !enabled && context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Autorise les notifications dans les réglages de ton appareil.',
+                            ),
+                          ),
+                        );
+                      }
                     },
                   ),
                   const Divider(height: 1, indent: 16, endIndent: 16),

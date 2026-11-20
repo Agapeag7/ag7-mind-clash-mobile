@@ -35,6 +35,7 @@ dependencies:
   flutter_riverpod: ^2.5.1
   shared_preferences: ^2.2.3
   google_fonts: ^6.2.1
+  flutter_local_notifications: ^23.0.3
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -71,6 +72,8 @@ flutter:
   assets:
     - assets/icon/icone_ag7mindclash.png
     - assets/audio/
+    - assets/audio/bgm/
+    - assets/audio/sfx/
     - assets/images/
     - assets/images/backgrounds/
     - assets/images/characters/

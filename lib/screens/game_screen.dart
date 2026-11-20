@@ -147,6 +147,7 @@ class _GameScreenState extends State<GameScreen> {
       won: _gm.gameWinnerSide == 0,
       correctAnswers: _gm.correctAnswers,
       totalAnswers: _gm.totalAnswers,
+      difficulty: widget.difficulty,
     );
     if (!mounted) return;
     await Navigator.push<void>(
