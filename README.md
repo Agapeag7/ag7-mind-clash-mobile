@@ -46,3 +46,8 @@ Developer et une configuration de signature dans Xcode.
 La mémoire du daemon Gradle est plafonnée à 1,5 Go et ses workers sont limités à deux pour éviter que la compilation ne dépasse la mémoire disponible. Pour générer l'APK :
 
     flutter build apk --release
+
+
+
+
+
