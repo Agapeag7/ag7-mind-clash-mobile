@@ -139,7 +139,7 @@ class AudioService {
         );
         break;
       case PowerUpType.autoAnswer:
-        _playSfx('sfx/effet-activation-bonus-double-point.mp3');
+        _playSfx('sfx/sfx-activation-bonus-reponse-auto.mp3');
         break;
     }
     if (sfxEnabled) HapticFeedback.lightImpact();

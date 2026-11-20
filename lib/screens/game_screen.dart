@@ -236,7 +236,7 @@ class _GameScreenState extends State<GameScreen> {
     final activeColor = activeTeam.isRed ? AppColors.red : AppColors.blue;
 
     return AudioPageMusic(
-      tracks: const [],
+      tracks: const ['bgm/theme-music-background-lors-du-jeu.mp3'],
       child: Scaffold(
         body: SafeArea(
           child: Column(
