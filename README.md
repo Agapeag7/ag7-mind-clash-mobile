@@ -47,3 +47,7 @@ La mémoire du daemon Gradle est plafonnée à 1,5 Go et ses workers sont limit�
 
     flutter build apk --release
 
+
+
+- modifie l'SFX du bonus "Reponse auto" lors de l'activer par: sfx-activation-bonus-reponse-auto.mp3
+- ajoute cette musique en background quand lorsque le jeu est lancer (donc la musique du fond du jeu quand on resoud des questions (une partie de jeu lancer)) : theme-music-background-lors-du-jeu.mp3
