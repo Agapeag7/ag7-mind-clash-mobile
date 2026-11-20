@@ -15,7 +15,7 @@ void main() {
   test('Une nouvelle partie démarre avec corde à 0', () {
     final gm = GameManager(config: DifficultyConfig.byLevel(1), isVsAI: false);
     gm.startNewGame();
-    expect(gm.ropePosition, greaterThan(0));
+    expect(gm.ropePosition, 0);
     expect(gm.red.roundsWon, 0);
     expect(gm.blue.roundsWon, 0);
     gm.dispose();
@@ -168,7 +168,7 @@ void main() {
         isNot(originalQuestion.expression),
       );
       expect(gm.submitAnswer(originalQuestion.correctAnswer), isTrue);
-      expect(gm.ropePosition, greaterThan(0));
+      expect(gm.ropePosition, 0);
       gm.dispose();
     },
   );
