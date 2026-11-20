@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'core/constants.dart';
 import 'services/audio_service.dart';
 import 'services/notification_service.dart';
+import 'services/storage_service.dart';
 import 'screens/splash_screen.dart';
 
 class Ag7App extends StatefulWidget {
@@ -20,6 +21,28 @@ class _Ag7AppState extends State<Ag7App> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(_initializeNotifications());
+    });
+  }
+
+  Future<void> _initializeNotifications() async {
+    try {
+      final remindersEnabled = await StorageService.getRemindersEnabled();
+      await NotificationService.initialize(enabled: remindersEnabled);
+      if (remindersEnabled && !NotificationService.remindersEnabled) {
+        await StorageService.setRemindersEnabled(false);
+      }
+    } catch (error, stackTrace) {
+      FlutterError.reportError(
+        FlutterErrorDetails(
+          exception: error,
+          stack: stackTrace,
+          library: 'notifications',
+          context: ErrorDescription('while initializing local notifications'),
+        ),
+      );
+    }
   }
 
   @override
