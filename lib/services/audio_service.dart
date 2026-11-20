@@ -73,14 +73,7 @@ class AudioService {
   }
 
   static void correct({required bool isVsAI}) {
-    if (isVsAI) {
-      _playRandomSfx([
-        'sfx/réussite-mache-vs-ia-1.mp3',
-        'sfx/réussite-mache-vs-ia-2.mp3',
-      ]);
-    } else {
-      _playSfx('sfx/reussite-manche-humain-vs-humain-1.mp3');
-    }
+    _playSfx('sfx/sfx-reussite-bonne-reponse.mp3');
     if (sfxEnabled) HapticFeedback.mediumImpact();
   }
 

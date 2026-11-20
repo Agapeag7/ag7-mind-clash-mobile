@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../core/constants.dart';
 import '../providers/app_providers.dart';
 import '../services/audio_service.dart';
@@ -16,118 +17,121 @@ class SettingsScreen extends ConsumerWidget {
     final notifier = ref.read(appSettingsProvider.notifier);
 
     return AudioPageMusic(
-      tracks: const [],
+      tracks: const ['bgm/theme-music-page-parametres.mp3'],
       child: Scaffold(
         appBar: AppBar(title: const Text('Paramètres')),
         body: GamePageBackground(
           child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            const GamePageHeading(
-              title: 'Personnalise ta partie',
-              subtitle: 'Ajuste le jeu selon tes envies',
-            ),
-            const SizedBox(height: 18),
-            GamePanel(
-              padding: EdgeInsets.zero,
-              child: Column(
-                children: [
-                  SwitchListTile(
-                    secondary: const Icon(
-                      Icons.music_note_rounded,
-                      color: AppColors.blue,
-                    ),
-                    title: const Text(
-                      'Musique',
-                      style: TextStyle(fontWeight: FontWeight.w700),
-                    ),
-                    value: settings.musicEnabled,
-                    activeThumbColor: AppColors.green,
-                    onChanged: (value) {
-                      notifier.setMusic(value);
-                      StorageService.setMusicEnabled(value);
-                      AudioService.setMusicEnabled(value);
-                    },
-                  ),
-                  const Divider(height: 1, indent: 16, endIndent: 16),
-                  SwitchListTile(
-                    secondary: const Icon(
-                      Icons.volume_up_rounded,
-                      color: AppColors.blue,
-                    ),
-                    title: const Text(
-                      'Effets sonores',
-                      style: TextStyle(fontWeight: FontWeight.w700),
-                    ),
-                    value: settings.sfxEnabled,
-                    activeThumbColor: AppColors.green,
-                    onChanged: (value) {
-                      notifier.setSfx(value);
-                      StorageService.setSfxEnabled(value);
-                      AudioService.setSfxEnabled(value);
-                    },
-                  ),
-                  const Divider(height: 1, indent: 16, endIndent: 16),
-                  SwitchListTile(
-                    secondary: const Icon(
-                      Icons.notifications_active_rounded,
-                      color: AppColors.blue,
-                    ),
-                    title: const Text(
-                      'Rappel quotidien',
-                      style: TextStyle(fontWeight: FontWeight.w700),
-                    ),
-                    subtitle: const Text('Après 24 h sans ouvrir le jeu'),
-                    value: settings.remindersEnabled,
-                    activeThumbColor: AppColors.green,
-                    onChanged: (value) async {
-                      final enabled = await NotificationService.setEnabled(
-                        value,
-                      );
-                      notifier.setReminders(value && enabled);
-                      await StorageService.setRemindersEnabled(
-                        value && enabled,
-                      );
-                      if (value && !enabled && context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                              'Autorise les notifications dans les réglages de ton appareil.',
-                            ),
-                          ),
-                        );
-                      }
-                    },
-                  ),
-                  const Divider(height: 1, indent: 16, endIndent: 16),
-                  ListTile(
-                    leading: const Icon(
-                      Icons.language_rounded,
-                      color: AppColors.blue,
-                    ),
-                    title: const Text(
-                      'Langue',
-                      style: TextStyle(fontWeight: FontWeight.w700),
-                    ),
-                    trailing: DropdownButton<String>(
-                      value: settings.language,
-                      underline: const SizedBox.shrink(),
-                      items: const [
-                        DropdownMenuItem(value: 'fr', child: Text('Français')),
-                        DropdownMenuItem(value: 'en', child: Text('English')),
-                      ],
+            padding: const EdgeInsets.all(16),
+            children: [
+              const GamePageHeading(
+                title: 'Personnalise ta partie',
+                subtitle: 'Ajuste le jeu selon tes envies',
+              ),
+              const SizedBox(height: 18),
+              GamePanel(
+                padding: EdgeInsets.zero,
+                child: Column(
+                  children: [
+                    SwitchListTile(
+                      secondary: const Icon(
+                        Icons.music_note_rounded,
+                        color: AppColors.blue,
+                      ),
+                      title: const Text(
+                        'Musique',
+                        style: TextStyle(fontWeight: FontWeight.w700),
+                      ),
+                      value: settings.musicEnabled,
+                      activeThumbColor: AppColors.green,
                       onChanged: (value) {
-                        if (value != null) {
-                          notifier.setLanguage(value);
-                          StorageService.setLanguage(value);
+                        notifier.setMusic(value);
+                        StorageService.setMusicEnabled(value);
+                        AudioService.setMusicEnabled(value);
+                      },
+                    ),
+                    const Divider(height: 1, indent: 16, endIndent: 16),
+                    SwitchListTile(
+                      secondary: const Icon(
+                        Icons.volume_up_rounded,
+                        color: AppColors.blue,
+                      ),
+                      title: const Text(
+                        'Effets sonores',
+                        style: TextStyle(fontWeight: FontWeight.w700),
+                      ),
+                      value: settings.sfxEnabled,
+                      activeThumbColor: AppColors.green,
+                      onChanged: (value) {
+                        notifier.setSfx(value);
+                        StorageService.setSfxEnabled(value);
+                        AudioService.setSfxEnabled(value);
+                      },
+                    ),
+                    const Divider(height: 1, indent: 16, endIndent: 16),
+                    SwitchListTile(
+                      secondary: const Icon(
+                        Icons.notifications_active_rounded,
+                        color: AppColors.blue,
+                      ),
+                      title: const Text(
+                        'Rappel quotidien',
+                        style: TextStyle(fontWeight: FontWeight.w700),
+                      ),
+                      subtitle: const Text('Après 24 h sans ouvrir le jeu'),
+                      value: settings.remindersEnabled,
+                      activeThumbColor: AppColors.green,
+                      onChanged: (value) async {
+                        final enabled = await NotificationService.setEnabled(
+                          value,
+                        );
+                        notifier.setReminders(value && enabled);
+                        await StorageService.setRemindersEnabled(
+                          value && enabled,
+                        );
+                        if (value && !enabled && context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Autorise les notifications dans les réglages de ton appareil.',
+                              ),
+                            ),
+                          );
                         }
                       },
                     ),
-                  ),
-                ],
+                    const Divider(height: 1, indent: 16, endIndent: 16),
+                    ListTile(
+                      leading: const Icon(
+                        Icons.language_rounded,
+                        color: AppColors.blue,
+                      ),
+                      title: const Text(
+                        'Langue',
+                        style: TextStyle(fontWeight: FontWeight.w700),
+                      ),
+                      trailing: DropdownButton<String>(
+                        value: settings.language,
+                        underline: const SizedBox.shrink(),
+                        items: const [
+                          DropdownMenuItem(
+                            value: 'fr',
+                            child: Text('Français'),
+                          ),
+                          DropdownMenuItem(value: 'en', child: Text('English')),
+                        ],
+                        onChanged: (value) {
+                          if (value != null) {
+                            notifier.setLanguage(value);
+                            StorageService.setLanguage(value);
+                          }
+                        },
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
           ),
         ),
       ),

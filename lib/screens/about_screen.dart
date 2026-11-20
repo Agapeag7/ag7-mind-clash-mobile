@@ -10,7 +10,7 @@ class AboutScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AudioPageMusic(
-      tracks: const [],
+      tracks: const ['bgm/theme-music-page-a-propos.mp3'],
       child: Scaffold(
         appBar: AppBar(title: const Text('À propos')),
         body: GamePageBackground(

@@ -47,7 +47,3 @@ La mémoire du daemon Gradle est plafonnée à 1,5 Go et ses workers sont limit�
 
     flutter build apk --release
 
-
-
-
-
