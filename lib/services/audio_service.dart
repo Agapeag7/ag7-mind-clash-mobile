@@ -50,6 +50,11 @@ class AudioService {
     _playMusic(asset);
   }
 
+  static void stopMusic() {
+    if (!_initialized) return;
+    FlameAudio.bgm.stop();
+  }
+
   static void _playMusic(String asset) {
     unawaited(FlameAudio.bgm.play(asset, volume: 0.45));
   }
@@ -182,6 +187,11 @@ class _AudioPageMusicState extends State<AudioPageMusic> with RouteAware {
       audioRouteObserver.subscribe(this, route);
       AudioService.playMusic(_track);
     }
+  }
+
+  @override
+  void didPushNext() {
+    AudioService.stopMusic();
   }
 
   @override

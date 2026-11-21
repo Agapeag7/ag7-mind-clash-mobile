@@ -1,0 +1,35 @@
+AG7 MIND CLASH
+Présentation du jeu
+
+Présentation
+
+AG7 Mind Clash est un jeu mobile de calcul sous la forme d’un duel de tir à la
+corde. Deux équipes s’affrontent : à chaque tour, le joueur doit résoudre une
+opération avant la fin du chronomètre. Une bonne réponse fait avancer la corde
+vers son équipe ; une mauvaise réponse ou un temps écoulé donne l’avantage à
+l’adversaire. La première équipe qui remporte trois manches gagne la partie.
+
+Le jeu propose deux modes : affronter un ami sur le même appareil ou jouer
+contre une intelligence artificielle. Plusieurs niveaux de difficulté
+permettent de progresser, des opérations simples jusqu’aux calculs plus
+complexes. Des bonus ajoutent également des possibilités stratégiques pendant
+les manches.
+
+Utilité du jeu
+
+AG7 Mind Clash permet de s’entraîner au calcul mental tout en s’amusant. Le
+chronomètre encourage à réfléchir rapidement et aide à travailler la
+concentration, la logique et la réactivité. Les différents niveaux permettent
+à chacun de jouer à son rythme et de relever des défis adaptés à son niveau.
+Le mode à deux joueurs ajoute une dimension conviviale et permet de partager
+une partie avec un ami.
+
+Origine de l’inspiration
+
+J’ai trouvé l’inspiration en regardant sur Internet des publicités pour des
+jeux. Leurs présentations dynamiques et leurs idées de défis m’ont donné envie
+de créer mon propre jeu, avec des règles faciles à comprendre et des parties
+rapides. J’ai eu l’idée de combiner l’énergie d’un duel de tir à la corde avec
+des questions de calcul : les bonnes réponses font progresser son équipe vers
+la victoire. J’ai ensuite développé cette idée pour en faire un jeu éducatif,
+amusant et jouable seul contre l’IA ou avec un ami.
