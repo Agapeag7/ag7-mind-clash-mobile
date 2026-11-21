@@ -16,7 +16,6 @@ class AudioService {
   static bool _initialized = false;
   static String? _currentMusic;
   static final Random _random = Random();
-  static Future<void> _sfxQueue = Future<void>.value();
 
   static Future<void> initialize({
     required bool musicEnabled,
@@ -158,18 +157,20 @@ class AudioService {
 
   static void _playSfx(String asset) {
     if (!sfxEnabled || !_initialized) return;
-    _sfxQueue = _sfxQueue.then((_) => _playSfxInOrder(asset));
+    unawaited(_playSfxOnce(asset));
   }
 
-  static Future<void> _playSfxInOrder(String asset) async {
+  static Future<void> _playSfxOnce(String asset) async {
     if (!sfxEnabled || !_initialized) return;
     try {
       final player = await FlameAudio.play(asset);
-      try {
-        await player.onPlayerComplete.first;
-      } finally {
-        await player.dispose();
-      }
+      unawaited(
+        player.onPlayerComplete.first.then((_) => player.dispose()).catchError((
+          Object error,
+        ) async {
+          await player.dispose();
+        }),
+      );
     } catch (error, stackTrace) {
       FlutterError.reportError(
         FlutterErrorDetails(

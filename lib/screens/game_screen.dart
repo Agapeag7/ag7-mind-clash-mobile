@@ -11,7 +11,6 @@ import '../game/ag7_game.dart';
 import '../game/game_manager.dart';
 import '../models/power_up.dart';
 import '../services/audio_service.dart';
-import '../services/storage_service.dart';
 import 'game_result_screen.dart';
 import 'pause_screen.dart';
 import 'round_result_screen.dart';
@@ -32,7 +31,6 @@ class _GameScreenState extends State<GameScreen> {
   final TextEditingController _answerController = TextEditingController();
   double _lastRope = 0;
   bool _handlingEnd = false;
-  bool _statsSaved = false;
 
   bool get _canPlayerAnswer =>
       _gm.phase == GamePhase.activeTurn &&
@@ -76,22 +74,16 @@ class _GameScreenState extends State<GameScreen> {
     final rope = _gm.ropePosition;
     AnimationState? redReaction;
     AnimationState? blueReaction;
-    final pullingSide = _gm.isRedTurn ? TeamSide.red : TeamSide.blue;
-    final isTugging =
-        _gm.phase == GamePhase.activeTurn ||
-        _gm.phase == GamePhase.answerValidated ||
-        _gm.phase == GamePhase.transition;
-    if (isTugging) {
-      _game.setTugging(pullingSide);
-      if ((rope - _lastRope).abs() > 0.05) {
-        if (pullingSide == TeamSide.red) {
-          redReaction = AnimationState.strongPull;
-          blueReaction = AnimationState.slip;
-        } else {
-          blueReaction = AnimationState.strongPull;
-          redReaction = AnimationState.slip;
-        }
-      }
+    if (rope < _lastRope - 0.05) {
+      redReaction = AnimationState.strongPull;
+      blueReaction = AnimationState.slip;
+    } else if (rope > _lastRope + 0.05) {
+      blueReaction = AnimationState.strongPull;
+      redReaction = AnimationState.slip;
+    } else if (_gm.phase == GamePhase.activeTurn && !_gm.isRedTurn) {
+      // L'adversaire tire
+      blueReaction = null;
+      redReaction = null;
     }
     _lastRope = rope;
     _game.setRopePosition(
@@ -99,6 +91,9 @@ class _GameScreenState extends State<GameScreen> {
       redReaction: redReaction,
       blueReaction: blueReaction,
     );
+    if (_gm.phase == GamePhase.activeTurn) {
+      _game.setTugging(_gm.isRedTurn ? TeamSide.red : TeamSide.blue);
+    }
 
     if (_gm.phase == GamePhase.roundOver && !_handlingEnd) {
       _handlingEnd = true;
@@ -141,16 +136,8 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   Future<void> _showGameResult() async {
-    if (!mounted || _statsSaved) return;
-    _statsSaved = true;
-    await StorageService.recordGameResult(
-      won: _gm.gameWinnerSide == 0,
-      correctAnswers: _gm.correctAnswers,
-      totalAnswers: _gm.totalAnswers,
-      difficulty: widget.difficulty,
-    );
     if (!mounted) return;
-    await Navigator.push<void>(
+    await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => GameResultScreen(
@@ -160,9 +147,7 @@ class _GameScreenState extends State<GameScreen> {
         ),
       ),
     );
-    if (mounted) {
-      Navigator.of(context).popUntil((route) => route.isFirst);
-    }
+    if (mounted) Navigator.pop(context);
   }
 
   void _onNumberTap(String digit) {
@@ -239,11 +224,19 @@ class _GameScreenState extends State<GameScreen> {
       tracks: const ['bgm/theme-music-background-lors-du-jeu.mp3'],
       child: Scaffold(
         body: SafeArea(
-          child: Column(
-            children: [
-              _buildHeader(activeColor),
-              Expanded(child: _buildQuestionPanel(activeColor)),
-            ],
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final arenaHeight = (constraints.maxHeight * 0.17)
+                  .clamp(100.0, 140.0)
+                  .toDouble();
+              return Column(
+                children: [
+                  _buildHeader(activeColor),
+                  SizedBox(height: arenaHeight, child: _buildArena()),
+                  Expanded(child: _buildQuestionPanel(activeColor)),
+                ],
+              );
+            },
           ),
         ),
       ),
@@ -253,52 +246,51 @@ class _GameScreenState extends State<GameScreen> {
   Widget _buildArena() {
     final game = _game;
     return Container(
+      margin: const EdgeInsets.fromLTRB(12, 8, 12, 10),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.panelBorder),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.panelBorder, width: 2),
         boxShadow: [
           BoxShadow(
-            color: AppColors.navy.withValues(alpha: 0.08),
-            blurRadius: 5,
-            offset: const Offset(0, 2),
+            color: AppColors.navy.withValues(alpha: 0.12),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(11),
-        child: SizedBox(
-          width: double.infinity,
-          height: double.infinity,
-          child: Stack(
-            children: [
-              Positioned.fill(child: GameWidget(game: game)),
-              Positioned(
-                top: 4,
-                left: 6,
-                child: _teamMarker('ROUGE', AppColors.red),
+        borderRadius: BorderRadius.circular(19),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            GameWidget(game: game),
+            Positioned(
+              top: 10,
+              left: 10,
+              child: _teamMarker('ROUGE', AppColors.red),
+            ),
+            Positioned(
+              top: 10,
+              right: 54,
+              child: _teamMarker(
+                _gm.isVsAI ? 'BLEU · IA' : 'BLEU',
+                AppColors.blue,
               ),
-              Positioned(
-                top: 4,
-                right: 46,
-                child: _teamMarker(
-                  _gm.isVsAI ? 'BLEU · IA' : 'BLEU',
-                  AppColors.blue,
+            ),
+            Positioned(
+              top: 2,
+              right: 2,
+              child: IconButton(
+                icon: const Icon(
+                  Icons.pause_circle_filled,
+                  size: 36,
+                  color: AppColors.navy,
                 ),
+                onPressed: _onPause,
               ),
-              Positioned(
-                top: -6,
-                right: -6,
-                child: IconButton(
-                  icon: const Icon(
-                    Icons.pause_circle_filled,
-                    size: 32,
-                    color: AppColors.navy,
-                  ),
-                  onPressed: _onPause,
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -398,16 +390,21 @@ class _GameScreenState extends State<GameScreen> {
     final inventory = _gm.isRedTurn ? _gm.redInventory : _gm.blueInventory;
     return LayoutBuilder(
       builder: (context, constraints) {
-        final compact = constraints.maxHeight < 560;
+        final compact = constraints.maxHeight < 420;
         final spacing = compact ? 4.0 : 8.0;
-        const reservedHeight = 286.0;
+        final reservedHeight = inventory.isEmpty ? 190.0 : 228.0;
         final keyHeight = compact
             ? ((constraints.maxHeight - reservedHeight) / 4)
                   .clamp(24.0, 44.0)
                   .toDouble()
             : 40.0;
         return Container(
-          padding: EdgeInsets.fromLTRB(12, compact ? 5 : 10, 12, 10),
+          padding: EdgeInsets.fromLTRB(
+            12,
+            compact ? 5 : 10,
+            12,
+            compact ? 5 : 8,
+          ),
           decoration: BoxDecoration(
             color: Colors.white,
             border: const Border(top: BorderSide(color: AppColors.panelBorder)),
@@ -420,7 +417,7 @@ class _GameScreenState extends State<GameScreen> {
             ],
           ),
           child: Column(
-            mainAxisSize: MainAxisSize.max,
+            mainAxisSize: MainAxisSize.min,
             children: [
               Row(
                 children: [
@@ -450,16 +447,14 @@ class _GameScreenState extends State<GameScreen> {
                   ),
                 ],
               ),
-              SizedBox(height: compact ? 3 : 6),
-              Expanded(child: _buildArena()),
               SizedBox(height: spacing),
               Row(
                 children: [
                   Expanded(
                     child: LinearProgressIndicator(
-                      value: _gm.maxTime == 0
+                      value: _gm.turnTimeLimit == 0
                           ? 0
-                          : (_gm.timeLeft / _gm.maxTime).clamp(0.0, 1.0),
+                          : (_gm.timeLeft / _gm.turnTimeLimit).clamp(0.0, 1.0),
                       minHeight: compact ? 6 : 8,
                       backgroundColor: Colors.black12,
                       valueColor: AlwaysStoppedAnimation(activeColor),
@@ -477,40 +472,24 @@ class _GameScreenState extends State<GameScreen> {
                   Text('♥ ${_gm.attemptsLeft}'),
                 ],
               ),
-              SizedBox(height: spacing),
-              Container(
-                width: double.infinity,
-                height: compact ? 30 : 48,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: AppColors.bgBottom.withValues(alpha: 0.35),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.panelBorder),
+              if (!inventory.isEmpty) ...[
+                SizedBox(height: spacing),
+                SizedBox(
+                  height: compact ? 30 : 48,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: inventory.items
+                          .map(
+                            (powerUp) =>
+                                _buildPowerUpIcon(powerUp, compact: compact),
+                          )
+                          .toList(),
+                    ),
+                  ),
                 ),
-                child: inventory.isEmpty
-                    ? Text(
-                        'Aucun bonus',
-                        style: TextStyle(
-                          color: AppColors.muted,
-                          fontSize: compact ? 9 : 11,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      )
-                    : FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: inventory.items
-                              .map(
-                                (powerUp) => _buildPowerUpIcon(
-                                  powerUp,
-                                  compact: compact,
-                                ),
-                              )
-                              .toList(),
-                        ),
-                      ),
-              ),
+              ],
               SizedBox(height: spacing),
               Container(
                 width: double.infinity,
@@ -588,14 +567,16 @@ class _GameScreenState extends State<GameScreen> {
               ),
               SizedBox(height: spacing),
               Container(
-                width: double.infinity,
                 padding: EdgeInsets.all(compact ? 3 : 4),
                 decoration: BoxDecoration(
                   color: AppColors.bgBottom.withValues(alpha: 0.55),
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(color: AppColors.panelBorder),
                 ),
-                child: _buildKeypad(activeColor, keyHeight),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 300),
+                  child: _buildKeypad(activeColor, keyHeight),
+                ),
               ),
             ],
           ),
@@ -674,9 +655,11 @@ class _GameScreenState extends State<GameScreen> {
     return Column(
       children: rows.map((r) {
         return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: r.map((label) {
             final isAction = label == 'C' || label == '⌫';
-            return Expanded(
+            return SizedBox(
+              width: keyHeight <= 30 ? 78 : 92,
               child: Padding(
                 padding: const EdgeInsets.all(3),
                 child: SizedBox(

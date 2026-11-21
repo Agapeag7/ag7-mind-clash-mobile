@@ -5,13 +5,11 @@ import '../../core/enums.dart';
 import 'character_component.dart';
 
 class TeamComponent extends PositionComponent {
-  static const double _spacingScale = 1;
-
   final TeamSide side;
   final List<CharacterComponent> members = [];
   final Color color;
-  late double _homeX = position.x;
-  double _movementOffset = 0;
+  late final double _homeX = position.x;
+  late double _targetX = position.x;
 
   TeamComponent({
     required Vector2 position,
@@ -22,14 +20,14 @@ class TeamComponent extends PositionComponent {
   }) : super(
          position: position,
          size: Vector2(spacing.last + charHeight * 0.62, charHeight),
-         priority: 60,
        ) {
+    final characterWidth = charHeight * 0.62;
     for (var i = 0; i < spacing.length; i++) {
       final isLeader =
           (side == TeamSide.red && i == spacing.length - 1) ||
           (side == TeamSide.blue && i == 0);
       final c = CharacterComponent(
-        position: Vector2.zero(),
+        position: Vector2(characterWidth / 2 + spacing[i], charHeight),
         side: side,
         teamColor: color,
         isLeader: isLeader,
@@ -39,54 +37,25 @@ class TeamComponent extends PositionComponent {
       members.add(c);
       add(c);
     }
-    _setMemberDepthOrder();
-    _layoutMembers(spacing, charHeight);
   }
 
-  void layout({
-    required Vector2 position,
-    required double spacing,
-    required double charHeight,
-  }) {
-    final normalizedOffset = size.y == 0 ? 0.0 : _movementOffset / size.y;
-    this.position.setFrom(position);
-    _homeX = position.x;
-    _movementOffset = normalizedOffset * charHeight;
-    this.position.x = _homeX + _movementOffset;
-    size.setValues(spacing + charHeight * 0.62, charHeight);
-    _layoutMembers(
-      List<double>.generate(members.length, (index) => index * spacing),
-      charHeight,
-    );
-    _setMemberDepthOrder();
-  }
-
-  void _layoutMembers(List<double> spacing, double characterHeight) {
-    final characterWidth = characterHeight * 0.62;
-    final scaledSpacingEnd = spacing.last * _spacingScale;
-    final horizontalOffset =
-        (size.x - characterWidth - scaledSpacingEnd) / 2;
-    for (var i = 0; i < members.length; i++) {
-      members[i]
-        ..position.setValues(
-          horizontalOffset +
-              characterWidth / 2 +
-              spacing[i] * _spacingScale,
-          characterHeight,
-        )
-        ..size.setValues(characterWidth, characterHeight);
+  @override
+  void update(double dt) {
+    super.update(dt);
+    final delta = _targetX - position.x;
+    if (delta.abs() < 0.1) {
+      position.x = _targetX;
+    } else {
+      position.x += delta * (dt * 8).clamp(0.0, 1.0).toDouble();
     }
   }
 
-  void _setMemberDepthOrder() {
-    for (final member in members) {
-      member.priority = 0;
-    }
-  }
-
-  void moveWithRope(double distance) {
-    _movementOffset += distance;
-    position.x = _homeX + _movementOffset;
+  void setRopePosition(double ropePosition, double pixelsPerUnit) {
+    final movement = ropePosition * pixelsPerUnit * 0.75;
+    final teamMovement = side == TeamSide.red
+        ? (movement > 0 ? movement : 0.0)
+        : (movement < 0 ? movement : 0.0);
+    _targetX = _homeX + teamMovement;
   }
 
   void playTeam(
@@ -100,7 +69,7 @@ class TeamComponent extends PositionComponent {
   }
 
   void resetTeam() {
-    _movementOffset = 0;
+    _targetX = _homeX;
     position.x = _homeX;
     for (final m in members) {
       m.play(AnimationState.idle);
