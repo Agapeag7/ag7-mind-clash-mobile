@@ -113,6 +113,7 @@ class AudioService {
   }
 
   static void roundOver({required bool humanWon, required bool isVsAI}) {
+    stopMusic();
     _playSfx('sfx/fin-de-manche.mp3');
     if (isVsAI) {
       if (humanWon) {

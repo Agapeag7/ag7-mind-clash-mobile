@@ -26,6 +26,8 @@ class GameScreen extends StatefulWidget {
 }
 
 class _GameScreenState extends State<GameScreen> {
+  static const _gameMusicTrack = 'bgm/theme-music-background-lors-du-jeu.mp3';
+
   late final GameManager _gm;
   late final Ag7Game _game;
   final TextEditingController _answerController = TextEditingController();
@@ -221,7 +223,7 @@ class _GameScreenState extends State<GameScreen> {
     final activeColor = activeTeam.isRed ? AppColors.red : AppColors.blue;
 
     return AudioPageMusic(
-      tracks: const ['bgm/theme-music-background-lors-du-jeu.mp3'],
+      tracks: const [_gameMusicTrack],
       child: Scaffold(
         body: SafeArea(
           child: LayoutBuilder(
