@@ -15,6 +15,8 @@ class AudioService {
   static bool sfxEnabled = true;
   static bool _initialized = false;
   static String? _currentMusic;
+  static int _musicRequest = 0;
+  static Future<void> _musicOperations = Future<void>.value();
   static final Random _random = Random();
 
   static Future<void> initialize({
@@ -23,16 +25,16 @@ class AudioService {
   }) async {
     AudioService.musicEnabled = musicEnabled;
     AudioService.sfxEnabled = sfxEnabled;
-    FlameAudio.bgm.initialize();
+    await FlameAudio.bgm.initialize();
     _initialized = true;
   }
 
   static void setMusicEnabled(bool enabled) {
     musicEnabled = enabled;
     if (!enabled) {
-      FlameAudio.bgm.stop();
+      stopMusic();
     } else if (_currentMusic != null) {
-      _playMusic(_currentMusic!);
+      playMusic(_currentMusic);
     }
   }
 
@@ -43,20 +45,31 @@ class AudioService {
   static void playMusic(String? asset) {
     _currentMusic = asset;
     if (!_initialized) return;
-    if (!musicEnabled || asset == null) {
-      FlameAudio.bgm.stop();
-      return;
-    }
-    _playMusic(asset);
+    final request = ++_musicRequest;
+    _queueMusicOperation(() async {
+      if (request != _musicRequest || !musicEnabled || asset == null) {
+        await FlameAudio.bgm.stop();
+        return;
+      }
+      await FlameAudio.bgm.play(asset, volume: 0.45);
+    });
   }
 
   static void stopMusic() {
     if (!_initialized) return;
-    FlameAudio.bgm.stop();
+    final request = ++_musicRequest;
+    _queueMusicOperation(() async {
+      if (request == _musicRequest) await FlameAudio.bgm.stop();
+    });
   }
 
-  static void _playMusic(String asset) {
-    unawaited(FlameAudio.bgm.play(asset, volume: 0.45));
+  static void _queueMusicOperation(Future<void> Function() operation) {
+    _musicOperations = _musicOperations.then((_) => operation()).catchError((
+      Object error,
+      StackTrace stackTrace,
+    ) {
+      _reportAudioError(error, stackTrace, 'while changing background music');
+    });
   }
 
   static void menuSelection() {
@@ -162,25 +175,56 @@ class AudioService {
 
   static Future<void> _playSfxOnce(String asset) async {
     if (!sfxEnabled || !_initialized) return;
+    final player = AudioPlayer()..audioCache = FlameAudio.audioCache;
+    final completed = Completer<void>();
+    final completionSubscription = player.onPlayerComplete.listen((_) {
+      if (!completed.isCompleted) completed.complete();
+    });
     try {
-      final player = await FlameAudio.play(asset);
-      unawaited(
-        player.onPlayerComplete.first.then((_) => player.dispose()).catchError((
-          Object error,
-        ) async {
-          await player.dispose();
-        }),
+      await player.setAudioContext(
+        AudioContextConfig(focus: AudioContextConfigFocus.mixWithOthers)
+            .build(),
       );
+      await player.setReleaseMode(ReleaseMode.release);
+      await player.play(
+        AssetSource(asset),
+        volume: 1,
+        mode: PlayerMode.lowLatency,
+      );
+      await completed.future;
     } catch (error, stackTrace) {
-      FlutterError.reportError(
-        FlutterErrorDetails(
-          exception: error,
-          stack: stackTrace,
-          library: 'audio',
-          context: ErrorDescription('while playing sound effect "$asset"'),
-        ),
+      _reportAudioError(
+        error,
+        stackTrace,
+        'while playing sound effect "$asset"',
       );
+    } finally {
+      await completionSubscription.cancel();
+      try {
+        await player.dispose();
+      } catch (error, stackTrace) {
+        _reportAudioError(
+          error,
+          stackTrace,
+          'while disposing sound effect player "$asset"',
+        );
+      }
     }
+  }
+
+  static void _reportAudioError(
+    Object error,
+    StackTrace stackTrace,
+    String context,
+  ) {
+    FlutterError.reportError(
+      FlutterErrorDetails(
+        exception: error,
+        stack: stackTrace,
+        library: 'audio',
+        context: ErrorDescription(context),
+      ),
+    );
   }
 }
 
